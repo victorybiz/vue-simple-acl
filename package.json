@@ -1,6 +1,6 @@
 {
   "name": "vue-simple-acl",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "description": "A simple package to manage permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.",
   "scripts": {
     "dev": "vite",
