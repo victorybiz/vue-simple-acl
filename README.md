@@ -2,12 +2,35 @@
 
 A simple package to manage permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.
 
+<div align="center">
+
+  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
+    <img alt="npm" src="https://img.shields.io/npm/dm/vue-simple-acl?color=%2353ca2f">
+  </a>
+<!-- 
+  <a href="https://codecov.io/gh/victorybiz/vue-simple-acl" target="_blank">
+    <img src="https://img.shields.io/victorybiz/c/github/victorybiz/vue-simple-acl"/>
+  </a> -->
+
+  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
+    <img alt="npm bundle size (scoped version)" src="https://img.shields.io/bundlephobia/minzip/vue-simple-acl?color=53ca2f">
+  </a>
+
+  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
+    <img alt="npm" src="https://img.shields.io/npm/v/vue-simple-acl">
+  </a>
+
+</div>
+<br>
+<br>
+
 ## Features
 - Vue 3 support
-- Lightweight (<10 kB gzipped)
-- 100% coverage
+- Simple but robust and power ACL plugin
+- Lightweight (<12 kB gzipped)
 - Component `v-can` directive
 - Global `$can` helper function
+- Support for [Vue Router](https://next.router.vuejs.org/) through `meta` property.
 - Reactive changes of abilities and permissions
 - Define custom ACL rules
 
