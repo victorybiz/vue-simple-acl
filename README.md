@@ -21,8 +21,7 @@ A simple package to manage permissions for Access-Control List (ACL) / Role Base
   </a>
 
 </div>
-<br>
-<br>
+
 
 ## Features
 - Vue 3 support
