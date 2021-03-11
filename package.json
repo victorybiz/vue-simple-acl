@@ -1,0 +1,64 @@
+{
+  "name": "vue-simple-acl",
+  "version": "0.0.1",
+  "description": "A simple package to manage permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.",
+  "scripts": {
+    "dev": "vite",
+    "build": "npm run build:umd & npm run build:es & npm run build:unpkg",
+    "build:vite": "vite build",
+    "serve": "vite preview",
+    "build:umd": "rollup --config rollup.config.js --format umd --file dist/vue-simple-acl.umd.js",
+    "build:es": "rollup -c rollup.config.js --format es --file dist/vue-simple-acl.esm.js",
+    "build:unpkg": "rollup -c rollup.config.js --format iife --file dist/vue-simple-acl.min.js",
+    "deploy": "npm lint & npm build & npm publish"
+  },
+  "peerDependencies": {
+    "vue": "^3.0.0-0 || ^2.0.0",
+    "vue-router": "^4.0.0-0 || ^3.0.0"
+  },
+  "devDependencies": {
+    "@rollup/plugin-alias": "^3.1.2",
+    "@rollup/plugin-commonjs": "^17.1.0",
+    "@rollup/plugin-node-resolve": "^11.2.0",
+    "@vitejs/plugin-vue": "^1.1.4",
+    "@vue/compiler-sfc": "^3.0.7",
+    "eslint": "^7.21.0",
+    "rollup": "^2.41.0",
+    "rollup-plugin-css-only": "^3.1.0",
+    "rollup-plugin-vue": "^6.0.0",
+    "vite": "^2.0.0-beta.70"
+  },
+  "main": "dist/vue-simple-acl.js",
+  "browser": "dist/vue-simple-acl.esm.js",
+  "module": "dist/vue-simple-acl.esm.js",
+  "unpkg": "dist/vue-simple-acl.min.js",
+  "files": [
+    "dist/*",
+    "src/**/*.vue"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/victorybiz/vue-simple-acl"
+  },
+  "keywords": [
+    "vue",
+    "vuejs",
+    "vue3",
+    "vue 3",
+    "acl",
+    "rbac",
+    "vue-alc",
+    "vue alc",
+    "vue-simple-alc",
+    "vue simple alc",
+    "Access-Control List",
+    "Role Based Access Control",
+    "javacript"
+  ],
+  "author": "Victory Osayi <lavictorybiz@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/victorybiz/vue-simple-acl/issues"
+  },
+  "homepage": "https://github.com/victorybiz/vue-simple-acl#readme"
+}
