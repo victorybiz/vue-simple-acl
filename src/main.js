@@ -1,7 +1,8 @@
 // ======= DEMO =======
-import { createApp } from 'vue';
+import { createApp, computed } from 'vue';
 import App from './App.vue';
 import { createAcl, defineAclRules } from './VueSimpleAcl';
+import axios from 'axios';;
 
 // Router setup
 import { createRouter, createWebHistory } from 'vue-router';
@@ -39,13 +40,18 @@ const router = createRouter({
 //
 
 // Vue Simple ACL
-const user = {
+const user1 = {
   id: 1,
   name: 'Victory Osayi',
   is_editor: true,
   is_admin: false,
   // you can have role based permission list or access control list possibly from database
   permissions: ['admin', 'owner', 'moderator', 'create-post', 'edit-post', 'delete-post']
+}
+
+const user = () => {
+  return axios.get('https://jsonplaceholder.typicode.com/users/1')
+    .then((response) => response.data);
 }
 
 const rules = () => defineAclRules((setRule) => {

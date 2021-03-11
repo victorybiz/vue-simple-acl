@@ -62,6 +62,9 @@ const postTitle = post.title;
 // Usage in setup() / composition API
 const acl = useAcl();
 
+console.log(acl.user)
+console.log(acl.user.name)
+
 if (acl.can('edit-post', post)) {
   console.log('User CAN edit post');
 } else {

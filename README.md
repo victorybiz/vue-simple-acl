@@ -46,6 +46,10 @@ import { createApp } from 'vue'
 import App from './App.vue'
 import { createAcl, defineAclRules } from 'vue-simple-acl';
 
+// The Vue Simple ACL option 'user' can be a user OBJECT, FUNCTION returning a user object
+// or an Asynchronous function returning a PROMISE of user object, suitable for performing fetch from API.
+
+// USER EXAMPLE 1: User {OBJECT}
 const user = {
   id: 1,
   name: 'Victory Osayi',
@@ -54,9 +58,18 @@ const user = {
   // you can have role based permission list or access control list possibly from database
   permissions: ['admin', 'owner', 'moderator', 'create-post', 'edit-post', 'delete-post']
 }
-// Example of user retrieved from backend asynchronously, you can provide a function instead
-// to perform asynchronous fetch from api or return data from store/Vuex state
-// const user = () => store.auth.user;
+
+// USER EXAMPLE 2: User object from a {FUNCTION} or computed property like from Vuex Store
+// Suitable if you already has an existing logics authenticating and saving user data to Vuex Store
+const user2 = computed(() => store.state.auth.user);
+
+// USER EXAMPLE 3; User object from an Asynchronous {FUNCTION} / {PROMISE}:
+// Using Async/Promise requires instance of vue-router, the function will be auto hooked to beforeEach() peroperty of vue-router
+const user3 = () => {
+  const authUserId = 1; // ID of authenticated user
+  return axios.get(`api/users/${authUserId}`)
+    .then((response) => response.data);
+}
 
 const rules = () => defineAclRules((setRule) => {
   // setRule('unique-ability', callbackFunction(user, arg1, arg2, ...) { });
@@ -305,10 +318,12 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 
 
 ## Vue Simple ACL Options 
+ can be a user OBJECT, FUNCTION returning a user object
+// or an Asynchronous function returning a PROMISE of user object, suitable for performing fetch from API.
 
 | Option Name | Type | Required | Default | Description |
 | --- | --- | --- | --- | --- |
-| **user** | `object` or a `function` returning user object | Yes | None | Authenticated user's data e.g `{ id: 1, name: 'Victory Osayi', is_admin: true, ... }` |
+| **user** | `object` or a `function|async function/Promise` returning user object. <br> *Using Async/Promise requires instance of `vue-router`, the function will be auto hooked to `beforeEach()` peroperty of vue-router.* | Yes | None | Authenticated user's data e.g object or function or async function/promise returning `{ id: 1, name: 'Victory Osayi', is_admin: true, ... }` |
 | **rules** | `function` | Yes | None | function returning instance of `defineAclRules()` e.g `() => defineAclRules((setRule) => {...}` |
 | **directiveName** | `object` or a `function` returning user object | No | `'can'` |  You can set a custom directive name if the default name conflicts with other installed plugins. e.g `'custom-can'` then in component like `v-custom-can=""` |
 | **helperName** | `object` or a `function` returning user object | No | `'$can'` | You can set a custom helper name if the default name conflicts with other installed plugins. e.g `'$customCan'`, then use in component like `'$customCan()'` or `'$customCan.not()'` |

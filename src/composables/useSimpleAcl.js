@@ -22,13 +22,17 @@ export default function useSimpleAcl() {
       state.registeredUser = pluginOptions.user();
     } else {
       state.registeredUser = pluginOptions.user;
-    }
+    }   
     // Run and init the defined rules
     if (pluginOptions.rules && typeof pluginOptions.rules === "function") {
       pluginOptions.rules();
     }
     // Set other user defined plugins to state
     state.options = pluginOptions;
+  }
+
+  const asyncAwait = async (promiseObject) => {
+    return await promiseObject;
   }
 
 
@@ -294,6 +298,7 @@ export default function useSimpleAcl() {
   const installPlugin = (app, options = {}) => {
 
     const isVue3 = !!app.config.globalProperties;
+    let hasAsyncUser = false;
 
     const defaultPluginOptions = {
       user: null,
@@ -322,7 +327,14 @@ export default function useSimpleAcl() {
     }
     
     // Register the plugin options to state
-    registerPluginOptions(pluginOptions);
+    if (typeof pluginOptions.user === 'function' && pluginOptions.user() instanceof Promise) {
+      // when defined user is Asynchronous object or function
+      // It requires instance of a vue-router. See below for a router hook for async promise evaluation
+      hasAsyncUser = true;      
+    } else {
+      // when defined user is an object or function but non-Asynchronous
+      registerPluginOptions(pluginOptions);
+    }
     
     // directive handler function
     const directiveHandler = (el, binding, vnode) => {
@@ -412,7 +424,7 @@ export default function useSimpleAcl() {
 
     // Vue Router evaluation
     if (pluginOptions.router) {
-      const routerRedirectHandler  = (to, from, next, granted) => {
+      const routerRedirectHandler = (to, from, next, granted) => {
         if (granted) {
           next();
         } else {
@@ -431,9 +443,8 @@ export default function useSimpleAcl() {
           }
         }
       }
-      
-      // vue-router hook
-      pluginOptions.router.beforeEach((to, from, next) => {       
+
+      const evaluateRouterAcl = (to, from, next) => {
         if (to.meta && to.meta.can) {
           const abilities = to.meta.can;
           let granted = false;
@@ -466,8 +477,28 @@ export default function useSimpleAcl() {
         } else {
           // Proceed to request route if no can|canNot|CanAny meta is set
           next();
-        }        
+        }  
+      }
+      
+      // vue-router hook
+      pluginOptions.router.beforeEach((to, from, next) => { 
+        if (hasAsyncUser) {  
+          pluginOptions.user().then((user)=> {
+            pluginOptions.user = user;
+            registerPluginOptions(pluginOptions);
+            evaluateRouterAcl(to, from, next);
+          }).catch((err) => {
+            // Abort router
+            console.warn(`:::VueSimpleACL::: Error while processing/retrieving 'user' data with the Asynchronous function.`)
+          });  
+        } else {
+          evaluateRouterAcl(to, from, next);
+        }
       });
+    } else { // No router
+      if (hasAsyncUser) {
+        console.error(`:::VueSimpleACL::: Instance of vue-router is required to define 'user' retrieved from a promise or Asynchronous function.`)
+      }
     } // ./ Vue Router evaluation
   }
 
