@@ -1,7 +1,7 @@
 <template>
   <h1>Vue Simple ACL (DEMO)</h1>
   
-  <div v-can:create-post>
+  <div v-permission:create-post>
     #1. USER-1 can create POST
   </div>
   <br>
@@ -26,8 +26,9 @@
   <br>
   <input v-can:edit-post.disabled="post2" v-model="postTitle" type="text">
   <br>...
-  <div v-if="$can(['edit-post', post2])">
-    #1. USER-1 can create POST
+  {{ $acl }}
+  <div v-if="$acl.role('edit-post', post)">
+    #1. HELPER: USER-1 can create POST
   </div>
 
   <br>
@@ -36,40 +37,49 @@
   <router-view></router-view>
 
 </template>
-
-<script setup>
-import { getCurrentInstance } from 'vue'
+<script lang="ts">
+import { defineComponent } from 'vue'
 import { useAcl } from './VueSimpleAcl';
 
-const post = {
-  id: 100,
-  user_id: 1,
-  title: "First Post"
-}
-const post2 = {
-  id: 101,
-  user_id: 2,
-  title: "Second Post"
-}
-const comment = {
-  id: 101,
-  post_id: 100,
-  user_id: 1,
-  title: "Post commment"
-}
-const postTitle = post.title;
+export default defineComponent({
+  name: 'App',
 
-// Usage in setup() / composition API
-const acl = useAcl();
+  setup: () => {
+    const post = {
+      id: 100,
+      user_id: 1,
+      title: "First Post"
+    }
+    const post2 = {
+      id: 101,
+      user_id: 2,
+      title: "Second Post"
+    }
+    const comment = {
+      id: 101,
+      post_id: 100,
+      user_id: 1,
+      title: "Post commment"
+    }
+    const postTitle = post.title;
 
-console.log(acl.user)
-console.log(acl.user.name)
+    // Usage in setup() / composition API
+    const acl = useAcl();
 
-if (acl.can('edit-post', post)) {
-  console.log('User CAN edit post');
-} else {
-  console.log('User CAN NOT edit post');
-}
+    if (acl.can.not('edit-post', post)) {
+      console.log('User CAN edit post');
+    } else {
+      console.log('User CAN NOT edit post');
+    }
+
+    return { 
+      post,
+      post2,
+      comment,
+      postTitle
+    }
+  }
+});
 </script>
 
 <style>

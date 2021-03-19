@@ -1,9 +1,12 @@
 # Vue Simple ACL for Vue 3
 
-A simple package to manage permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.
+A simple package to manage roles and permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.
 
 <div align="center">
 
+  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
+    <img alt="npm" src="https://img.shields.io/npm/dt/vue-simple-acl?color=%2353ca2f">
+  </a>
   <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
     <img alt="npm" src="https://img.shields.io/npm/dm/vue-simple-acl?color=%2353ca2f">
   </a>
@@ -22,23 +25,49 @@ A simple package to manage permissions for Access-Control List (ACL) / Role Base
 
 </div>
 
+## Table of Contents
+* [Features](#features)
+* [Getting started](#getting-started)
+* [Usage](#usage)
+  * [Usage in component](#usage-in-component)
+  * [Using helper function in component](#using-helper)
+  * [Using helper function in `setup` Vue's Composition API](#composition-api)
+  * [Middleware for Vue Router](#middleware-for-vue-router)
+    * [`onDeniedRoute` meta property](#vue-router-ondeniedroute)
+    * [Vue Router `meta` Properties](#vue-router-meta)
+* [Semantic Alias methods](#semantic-alias)
+* [Vue Simple ACL Options](#options)
+* [TODO](#todo)
+* [Contributing](#contributing)
+* [Support](#support)
+* [License](#license)
 
+
+<br>
+
+<a name="features"></a>
 ## Features
 - Vue 3 support
 - Simple but robust and power ACL plugin
-- Lightweight (<12 kB gzipped)
+- Manage roles and permissions with ease.
+- Lightweight (<7 kB zipped)
 - Component `v-can` directive
 - Global `$can` helper function
-- Support for [Vue Router](https://next.router.vuejs.org/) through `meta` property.
+- Sematic alias methods of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
+- Middleware support for [Vue Router](https://next.router.vuejs.org/) through `meta` property.
+- Support user data from plain object, vuex store and asynchronous function.
 - Reactive changes of abilities and permissions
 - Define custom ACL rules
+- TypeScript Support
 
+<a name="getting-started"></a>
 ## Getting started
 
 ```
 npm install vue-simple-acl
 ```
 
+<a name="usage"></a>
 ## Usage
 
 ```javascript
@@ -104,6 +133,8 @@ app.use(simpleAcl); // install vue-simple-acl
 app.mount("#app");
 ```
 
+<a name="usage-in-component"></a>
+<a name="directives"></a>
 ## Usage in component
 
 The `v-can` directive can be used in different ways and you can apply one or more modifiers that alters the behaviour of the directive.
@@ -112,6 +143,12 @@ The `v-can` directive can be used in different ways and you can apply one or mor
 <button v-can:create-post>Create Post</button>
 <button v-can:edit-post="{ id: 100, user_id: 1, title: 'First Post' }">Edit</button>
 <button v-can:edit-post="postData">Edit</button>
+```
+Alternative you can use the sematic alias;
+```html
+<button v-permission:create-post>Create Post</button>
+<button v-role:admin>Create Post</button>
+<button v-role-or-permission="['admin', 'create-post']">Edit</button>
 ```
 
 ### `hide` modifier
@@ -150,6 +187,7 @@ The `any` modifier authorized if atleast one or any of specified abilities and a
 <button v-can.any="[['edit-post', post], ['delete-post', post]]">Manage Post</button>
 ```
 
+<a name="using-helper"></a>
 ## Using helper function in component
 
 You can also use the helper function $can directly in component and javascript:
@@ -166,6 +204,7 @@ if (this.$can('edit-post', post)) {
 }
 ```
 
+<a name="composition-api"></a>
 ## Using helper function in `setup` Vue's [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html)
 
 The introduction of `setup` and Vue's [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html), open up new possibilities but to be able to get the full potential out of Vue Simple ACL, we will need to use composable functions to replace access to this.
@@ -202,7 +241,8 @@ export default {
 }
 ```
 
-## [Vue Router](https://next.router.vuejs.org/) Integration
+<a name="middleware-for-vue-router"></a>
+## Middleware for [Vue Router](https://next.router.vuejs.org/)
 
 To integrate Vue Router, hook up the instance of `vue-router`'s `createRouter({..})` during setup of the Vue Simple ACL.
 
@@ -247,7 +287,7 @@ or using `not` modifier
   name: 'createPost',
   component: CreatePost,
   meta: {
-    canNot: 'moderator',
+    notCan: 'moderator',
     onDeniedRoute: { name: 'unauthorizedPage', replace: true }
   }
 }
@@ -259,7 +299,7 @@ or using `any` modifier
   name: 'createPost',
   component: CreatePost,
   meta: {
-    canAny: ['is-admin', 'create-post'],
+    anyCan: ['is-admin', 'create-post'],
     onDeniedRoute: { name: 'unauthorizedPage', replace: true }
   }
 }
@@ -284,15 +324,16 @@ or using `any` modifier
   path: 'posts/:postId/publish',
   component: ManagePost,
   meta: {
-    canAny: (to, from, canAny) => {        
+    anyCan: (to, from, anyCan) => {        
       return axios.get(`/api/posts/${to.params.id}/publish`)
-        .then((response) => canAny(['is-admin', ['edit-post', response.data]]));
+        .then((response) => anyCan(['is-admin', ['edit-post', response.data]]));
     },
     onDeniedRoute: '/unauthorized'
   }
 }
 ```
 
+<a name="vue-router-ondeniedroute"></a>
 #### `onDeniedRoute` meta property
 
 By default if you omit the 'onDeniedRoute' property from the a routes meta a denied check will redirect to a value of Vue Simple Acl's `createAcl` option `onDeniedRoute` which is `/` by default. You can change this behaviour by setting the `createAcl` option `onDeniedRoute`. This is useful if you use the package in an authentication or authorization flow by redirecting to unauthorized page if access is denied.
@@ -307,16 +348,30 @@ This will use replace rather than push when redirecting to the login page.
 onDeniedRoute: '$from'
 ```
 You can set the onDeniedRoute to the special value `'$from'` which will return the user to wherever they came from
+
+<a name="vue-router-meta"></a>
 ### Vue Router `meta` Properties
 
 | Property Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| **can** | `string` OR `array` of abilities or `function (to, from, can)` of async evaluation | None | Equivalent of `$can()` and `v-can=""` |
-| **canNot** | `string` OR `array` of abilities or `function (to, from, canNot)` of async evaluation | None | Equivalent of $can.not() and v-can.not="" |
-| **canAny** | `string` OR `array` of abilities or `function (to, from, canAny)` of async evaluation | None | Equivalent of `$can.any()` and `v-can.any=""` |
-| **onDeniedRoute** | `string` OR `object` of `route()` option | Value of the default option `onDeniedRoute`  | A route to redirect to when `can|canNot|canAny` evaluation is denied. e.g string path `'/unauthorized'` OR router option `{ path: '/unauthorized' }` OR `{ name: 'unauthorizedPage', replace: true }` OR special value **`'$from'`** which returns back to the request URI |
+| **can** or **allCan**| `string` OR `array` of abilities or `function (to, from, can)` of async evaluation | None | Equivalent of `$can()` and `v-can=""` |
+| **notCan** or **canNot** | `string` OR `array` of abilities or `function (to, from, notCan)` of async evaluation | None | Equivalent of `$can.not()` and `v-can.not=""` |
+| **anyCan** or **canAny**| `string` OR `array` of abilities or `function (to, from, anyCan)` of async evaluation | None | Equivalent of `$can.any()` and `v-can.any=""` |
+| **onDeniedRoute** | `string` OR `object` of `route()` option | Value of the default option `onDeniedRoute`  | A route to redirect to when `can|notCan|anyCan` evaluation is denied. e.g string path `'/unauthorized'` OR router option `{ path: '/unauthorized' }` OR `{ name: 'unauthorizedPage', replace: true }` OR special value **`'$from'`** which returns back to the request URI |
 
 
+<a name="semantic-alias"></a>
+## Semantic Alias methods
+Vue Simple ACL also provides some directives and methods in different verb as alias for default directive and helper function. You can use these aliases in place of `v-can` directive, `$can` helper function and vue router `can:` meta property for better semantic. See below table.
+
+| Alias Name | Usage |
+| --- | --- | --- |  --- |
+| Permission | As Directives:<br>`v-permission="'create-post'"`<br> `v-permission.not="'create-post'"`<br> `v-permission.any="['create-post', ['edit-post', post]]"` <br><br> In Component:<br> `$acl.permission('create-post')`<br> `$acl.notPermission('create-post')`<br> `$acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Option API:<br> `this.$acl.permission('create-post')`<br> `this.$acl.notPermission('create-post')`<br> `this.$acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.permission('create-post')`<br> `acl.notPermission('create-post')`<br> `acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Vue Router `meta` Property:<br> `permission: 'create-post'`<br> `notPermission: ['create-post', 'create-category']` <br><br> `anyPermission: (to, from, anyPermission) => {`<br>&nbsp;&nbsp;`return axios.get(`\``/api/posts/${to.params.id}`\``)`<br>&nbsp;&nbsp;`.then((response) => anyPermission(['create-post', ['edit-post', response.data]]));`<br>`}` |
+| Role | As Directives:<br>`v-role="'admin'"`<br> `v-role.not="'editor'"`<br> `v-role.any="['admin', 'editor']"` <br><br> In Component:<br> `$acl.role('admin')`<br> `$acl.notRole('editor')`<br> `$acl.anyRole(['admin', 'editor'])` <br><br> In Option API:<br> `this.$acl.role('admin')`<br> `this.$acl.notRole('editor')`<br> `this.$acl.anyRole(['admin', 'editor'])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.role('admin')`<br> `acl.notRole('editor')`<br> `acl.anyRole(['admin', 'editor'])` <br><br> In Vue Router `meta` Property:<br> `role: 'admin'`<br> `notRole: 'editor'` <br> `anyRole: ['admin', 'editor']` |
+| Role Or Permission | As Directives:<br>`v-role-or-permission="['admin', 'create-post']"`<br> `v-role-or-permission.not="['editor', 'create-post']"`<br> `v-role-or-permission.any="['admin', 'create-post', ['edit-post', post]]"` <br><br> In Component:<br> `$acl.roleOrPermission(['admin', 'create-post'])`<br> `$acl.notRoleOrPermission(['editor', 'create-post'])`<br> `$acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Option API:<br> `this.$acl.roleOrPermission(['admin', 'create-post'])`<br> `this.$acl.notRoleOrPermission(['editor', 'create-post'])`<br> `this.$acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.roleOrPermission(['admin', 'create-post'])`<br> `acl.notRoleOrPermission(['editor', 'create-post'])`<br> `acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Vue Router `meta` Property:<br> `roleOrPermission: ['admin', 'create-post']`<br> `notRoleOrPermission: ['editor', 'create-post', 'create-category']` <br><br> `anyRoleOrPermission: (to, from, anyRoleOrPermission) => {`<br>&nbsp;&nbsp;`return axios.get(`\``/api/posts/${to.params.id}`\``)`<br>&nbsp;&nbsp;`.then((response) => anyRoleOrPermission(['admin', 'create-post', ['edit-post', response.data]]));`<br>`}` |
+
+
+<a name="options"></a>
 ## Vue Simple ACL Options 
  can be a user OBJECT, FUNCTION returning a user object
 // or an Asynchronous function returning a PROMISE of user object, suitable for performing fetch from API.
@@ -331,11 +386,13 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 | **onDeniedRoute** | `string` or `object` | No | `/` | A route to redirect to when `can` evaluation is denied. e.g string path `'/unauthorized'` OR router option `{ path: '/unauthorized' }` OR `{ name: 'unauthorizedPage', replace: true }` OR special value `'$from'` which returns back to the request URI |
 
 
+<a name="todo"></a>
 ## TODO
 
 1. Chore: Write basic tests
-1. A documentation page with vitepress
+2. A documentation page with vitepress
 
+<a name="contributing"></a>
 ## 🤝 Contributing
 
 1. Fork this repository.
@@ -346,10 +403,14 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 6. Push your code to your fork repository.
 7. Create pull request. 🙂
 
+
+<a name="support"></a>
 ## ⭐️ Support
 
 If you like this project, You can support me with starring ⭐ this repository, [buy me a coffee](https://www.patreon.com/victoryosayi) or [become a patron](https://www.patreon.com/victoryosayi).
 
+
+<a name="license"></a>
 ## 📄 License
 
 [MIT](LICENSE)

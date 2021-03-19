@@ -2,10 +2,12 @@
 
 import alias from '@rollup/plugin-alias';
 import commonjs from '@rollup/plugin-commonjs';
-import auto from '@rollup/plugin-auto-install';
+// import auto from '@rollup/plugin-auto-install';
 import resolve from '@rollup/plugin-node-resolve';
 import VuePlugin from 'rollup-plugin-vue';
 import css from 'rollup-plugin-css-only';
+import { terser } from "rollup-plugin-terser";
+
 
 export default [
   // Vue 3
@@ -39,12 +41,13 @@ export default [
         css: false
       }),
       css(),
-      auto(),
+      // auto(),
       resolve(),
+      terser(),
       alias({
         resolve: ['.js', '.ts'],
         entries: [
-          { find: 'vue', replacement: 'node_modules/vue/dist/vue.runtime.esm-browser.prod.js' }
+          { find: 'vue', replacement: 'vue' }
         ]
       }),
     ],
@@ -86,8 +89,9 @@ export default [
         css: false
       }),
       css(),
-      auto(),
+      // auto(),
       resolve(),
+      terser(),
       alias({
         resolve: ['.js', '.ts'],
         entries: [
