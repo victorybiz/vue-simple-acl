@@ -35,7 +35,7 @@ A simple package to manage roles and permissions for Access-Control List (ACL) /
   * [Middleware for Vue Router](#middleware-for-vue-router)
     * [`onDeniedRoute` meta property](#vue-router-ondeniedroute)
     * [Vue Router `meta` Properties](#vue-router-meta)
-* [Semantic Alias methods](#semantic-alias)
+* [Semantic Alias methods and directives](#semantic-alias)
 * [Vue Simple ACL Options](#options)
 * [TODO](#todo)
 * [Contributing](#contributing)
@@ -53,7 +53,7 @@ A simple package to manage roles and permissions for Access-Control List (ACL) /
 - Lightweight (<7 kB zipped)
 - Component `v-can` directive
 - Global `$can` helper function
-- Sematic alias methods of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
+- Sematic alias methods and directives of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
 - Middleware support for [Vue Router](https://next.router.vuejs.org/) through `meta` property.
 - Support user data from plain object, vuex store and asynchronous function.
 - Reactive changes of abilities and permissions
@@ -361,7 +361,7 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 
 
 <a name="semantic-alias"></a>
-## Semantic Alias methods
+## Semantic Alias directives and methods
 Vue Simple ACL also provides some directives and methods in different verb as alias for default directive and helper function. You can use these aliases in place of `v-can` directive, `$can` helper function and vue router `can:` meta property for better semantic. See below table.
 
 | Alias Name | Usage |
