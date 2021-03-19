@@ -72,6 +72,8 @@ export default defineComponent({
       console.log('User CAN NOT edit post');
     }
 
+    // console.log(acl)
+
     return { 
       post,
       post2,
