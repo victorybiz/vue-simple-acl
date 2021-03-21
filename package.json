@@ -1,7 +1,16 @@
 {
   "name": "vue-simple-acl",
-  "version": "1.0.1",
-  "description": "A simple package to manage permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.",
+  "version": "1.0.2",
+  "description": "A simple unopinionated Vue plugin for managing user roles and permissions, access-control list (ACL) and role-based access control (RBAC).",
+  "main": "dist/vue-simple-acl.js",
+  "browser": "dist/vue-simple-acl.min.js",
+  "module": "dist/vue-simple-acl.esm.js",
+  "unpkg": "dist/vue-simple-acl.min.js",
+  "jsdelivr": "dist/vue-simple-acl.min.js",
+  "files": [
+    "dist/*",
+    "src/*"
+  ],
   "scripts": {
     "dev": "vite",
     "build": "npm run build:package",
@@ -31,13 +40,6 @@
     "vue": "^3.0.7",
     "vue-router": "^4.0.5"
   },
-  "main": "dist/vue-simple-acl.js",
-  "browser": "dist/vue-simple-acl.min.js",
-  "module": "dist/vue-simple-acl.esm.js",
-  "unpkg": "dist/vue-simple-acl.min.js",
-  "files": [
-    "dist/*"
-  ],
   "repository": {
     "type": "git",
     "url": "git+https://github.com/victorybiz/vue-simple-acl"
@@ -45,6 +47,8 @@
   "keywords": [
     "vue",
     "vuejs",
+    "vue2",
+    "vue 2",
     "vue3",
     "vue 3",
     "acl",
@@ -55,7 +59,8 @@
     "vue simple alc",
     "Access-Control List",
     "Role Based Access Control",
-    "javacript"
+    "javacript",
+    "typescript"
   ],
   "author": "Victory Osayi <lavictorybiz@gmail.com>",
   "license": "MIT",

@@ -1,34 +1,34 @@
-# Vue Simple ACL for Vue 3
+# Vue Simple ACL
 
-A simple package to manage roles and permissions for Access-Control List (ACL) / Role Based Access Control (RBAC) in a Vue app.
+A simple unopinionated Vue plugin for managing user roles and permissions, access-control list (ACL) and role-based access control (RBAC).
 
 <div align="center">
 
   <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
-    <img alt="npm" src="https://img.shields.io/npm/dt/vue-simple-acl?color=%2353ca2f">
+    <img src="https://img.shields.io/npm/v/vue-simple-acl.svg" alt="Version">
+  </a>
+  <a href="https://vuejs.org/" target="_blank"><img src="https://badgen.net/badge/Vue/2.x/cyan" alt="Vue 2"></a>
+  <a href="https://v3.vuejs.org/" target="_blank"><img src="https://badgen.net/badge/Vue/3.x/cyan" alt="Vue 3"></a>
+  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
+    <img alt="NPM Total Downloads" src="https://img.shields.io/npm/dt/vue-simple-acl?color=%2353ca2f">
   </a>
   <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
-    <img alt="npm" src="https://img.shields.io/npm/dm/vue-simple-acl?color=%2353ca2f">
+    <img alt="NPM Monthly Downloads" src="https://img.shields.io/npm/dm/vue-simple-acl?color=%2353ca2f">
   </a>
-<!-- 
-  <a href="https://codecov.io/gh/victorybiz/vue-simple-acl" target="_blank">
-    <img src="https://img.shields.io/victorybiz/c/github/victorybiz/vue-simple-acl"/>
-  </a> -->
-
   <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
-    <img alt="npm bundle size (scoped version)" src="https://img.shields.io/bundlephobia/minzip/vue-simple-acl?color=53ca2f">
+    <img alt="NPM bundle size (scoped version)" src="https://img.shields.io/bundlephobia/minzip/vue-simple-acl?color=53ca2f">
   </a>
-
-  <a href="https://www.npmjs.com/package/vue-simple-acl" target="_blank">
-    <img alt="npm" src="https://img.shields.io/npm/v/vue-simple-acl">
-  </a>
+  <a href="LICENSE" target="_blank"><img src="https://img.shields.io/npm/l/vue-gates.svg" alt="License"></a>
 
 </div>
 
 ## Table of Contents
 * [Features](#features)
-* [Getting started](#getting-started)
+* [Installation](#installation)
 * [Usage](#usage)
+  * [Usage with Vue 3](#usage-vue3)
+  * [Usage with Vue 2](#usage-vue2)
+  * [ACL Rules File](#acl-file)
   * [Usage in component](#usage-in-component)
   * [Using helper function in component](#using-helper)
   * [Using helper function in `setup` Vue's Composition API](#composition-api)
@@ -46,11 +46,12 @@ A simple package to manage roles and permissions for Access-Control List (ACL) /
 <br>
 
 <a name="features"></a>
+
 ## Features
-- Vue 3 support
+- Vue 2 and Vue 3 support
 - Simple but robust and power ACL plugin
 - Manage roles and permissions with ease.
-- Lightweight (<7 kB zipped)
+- Lightweight (<10 kB zipped)
 - Component `v-can` directive
 - Global `$can` helper function
 - Sematic alias methods and directives of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
@@ -59,22 +60,87 @@ A simple package to manage roles and permissions for Access-Control List (ACL) /
 - Reactive changes of abilities and permissions
 - Define custom ACL rules
 - TypeScript Support
+- Fully configurable
 
-<a name="getting-started"></a>
-## Getting started
+<a name="installation"></a>
 
+## Installation
+#### NPM
 ```
 npm install vue-simple-acl
 ```
+#### Yarn
+```
+yarn add vue-simple-acl
+```
+#### CDN
+[UNPKG](https://unpkg.com/vue-simple-acl)
+[JSDelivr](https://cdn.jsdelivr.net/npm/vue-simple-acl@latest/dist/vue-simple-acl.js)
+
 
 <a name="usage"></a>
+
 ## Usage
 
+<a name="usage-vue3"></a>
+
+### Usage with Vue 3
 ```javascript
+// src/main.js  OR  src/main.ts
+
 import { createApp } from 'vue'
 import App from './App.vue'
+import store from './store';
+import acl from './acl'; // import the instance of the defined ACL
+
+const app = createApp(App);
+app.use(store);
+app.use(acl); // install vue-simple-acl
+app.mount("#app");
+```
+
+<a name="usage-vue2"></a>
+
+### Usage with Vue 2
+In Vue 2, when using User data from reactive store/Vuex wrapped with `computed()`, which is available in Vue 3 module by default but not in Vue 2, make sure to install [@vue/composition-api](https://github.com/vuejs/composition-api#npm) first and change the imported module to: `import { computed } from '@vue/composition-api'`
+```javascript
+// src/main.js  OR  src/main.ts
+
+import Vue from 'vue'
+import App from './App.vue'
+import store from './store';
+import acl from './acl'; // import the instance of the defined ACL
+
+Vue.config.productionTip = false;
+
+Vue.use(store);
+Vue.use(acl); // install vue-simple-acl
+new Vue({
+  render: h => h(App),
+}).$mount('#app')
+```
+
+<a name="acl-file"></a>
+
+### ACL Rules File
+For readability, it is recommend to defined your ACL rules in a separate file.
+```javascript
+// src/acl/index.js  OR  src/acl/index.ts
+
+// Import router if you are using the middleware on Vue Router
+import router from "../router"; 
+// Import store if you are using reactive Store/Vuex as User data source
+import store from "../store";
+
+// ----- VUE 3 Import -----
+import { computed } from 'vue'; // For VUE 3
 import { createAcl, defineAclRules } from 'vue-simple-acl';
 
+// ----- VUE 2 Import -----
+import { computed } from '@vue/composition-api'; // Ensure this is installed
+import { createAcl, defineAclRules } from 'vue-simple-acl/dist/vue-simple-acl.vue2';
+
+// ---------------
 // The Vue Simple ACL option 'user' can be a user OBJECT, FUNCTION returning a user object
 // or an Asynchronous function returning a PROMISE of user object, suitable for performing fetch from API.
 
@@ -125,17 +191,17 @@ const rules = () => defineAclRules((setRule) => {
 const simpleAcl = createAcl({
   user, // short for user: user
   rules, // short for rules: rules
-  // other optional vue-simple-acl options here ...
+  router, // OPTIONAL, short for router: router 
+  // other optional vue-simple-acl options here... See Vue Simple ACL Options below
 });
 
-const app = createApp(App);
-app.use(simpleAcl); // install vue-simple-acl
-app.mount("#app");
+export default simpleAcl;
 ```
 
+
 <a name="usage-in-component"></a>
-<a name="directives"></a>
-## Usage in component
+
+### Usage in component
 
 The `v-can` directive can be used in different ways and you can apply one or more modifiers that alters the behaviour of the directive.
 
@@ -151,33 +217,33 @@ Alternative you can use the sematic alias;
 <button v-role-or-permission="['admin', 'create-post']">Edit</button>
 ```
 
-### `hide` modifier
+#### `hide` modifier
 This is the default behaviour of the `v-can` directive, it remove the component or element from the DOM more like `v-if`.
 You're not required to apply it unless you want to explicitly state the behavior.
 ```html
 <button v-can:edit-post.hide="postData">Edit</button>
 ```
 
-### `disable` modifier
+#### `disable` modifier
 The `disable` modifier applies the disabled attribute to the tag, e.g. to disable a button or input that you are not allowed to use or edit respectively.
 ```html
 <button v-can:edit-post.disable="postData">Edit</button>
 <input v-can:edit-post.disable="post" v-model="postTitle" type="text">
 ```
 
-### `readonly` modifier
+#### `readonly` modifier
 The `readonly` modifier applies the readonly attribute to the tag, e.g. to make an input read only if you don't have permission to edit.
 ```html
 <input v-can:edit-post.readonly="post" v-model="postTitle" type="text">
 ```
 
-### `not` modifier
+#### `not` modifier
 The `not` modifier reverses the ACL query. In this example only if you cannot delete the post the div element is shown.
 ```html
 <div v-can:delete-post.not="postData">You can not delete post created by you, ask admin for help.</div>
 ```
 
-### `any` modifier
+#### `any` modifier
 By default `v-can` directive with value that contains array of multiple abilities and ability arguments will be authorized if all specified abilities passes.
 The `any` modifier authorized if atleast one or any of specified abilities and ability arguments passes.
 ```html
@@ -188,7 +254,8 @@ The `any` modifier authorized if atleast one or any of specified abilities and a
 ```
 
 <a name="using-helper"></a>
-## Using helper function in component
+
+### Using helper function in component
 
 You can also use the helper function $can directly in component and javascript:
 ```html
@@ -205,7 +272,8 @@ if (this.$can('edit-post', post)) {
 ```
 
 <a name="composition-api"></a>
-## Using helper function in `setup` Vue's [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html)
+
+### Using helper function in `setup` Vue's [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html)
 
 The introduction of `setup` and Vue's [Composition API](https://v3.vuejs.org/guide/composition-api-introduction.html), open up new possibilities but to be able to get the full potential out of Vue Simple ACL, we will need to use composable functions to replace access to this.
 ```javascript
@@ -242,7 +310,8 @@ export default {
 ```
 
 <a name="middleware-for-vue-router"></a>
-## Middleware for [Vue Router](https://next.router.vuejs.org/)
+
+### Middleware for [Vue Router](https://next.router.vuejs.org/)
 
 To integrate Vue Router, hook up the instance of `vue-router`'s `createRouter({..})` during setup of the Vue Simple ACL.
 
@@ -334,6 +403,7 @@ or using `any` modifier
 ```
 
 <a name="vue-router-ondeniedroute"></a>
+
 #### `onDeniedRoute` meta property
 
 By default if you omit the 'onDeniedRoute' property from the a routes meta a denied check will redirect to a value of Vue Simple Acl's `createAcl` option `onDeniedRoute` which is `/` by default. You can change this behaviour by setting the `createAcl` option `onDeniedRoute`. This is useful if you use the package in an authentication or authorization flow by redirecting to unauthorized page if access is denied.
@@ -350,6 +420,7 @@ onDeniedRoute: '$from'
 You can set the onDeniedRoute to the special value `'$from'` which will return the user to wherever they came from
 
 <a name="vue-router-meta"></a>
+
 ### Vue Router `meta` Properties
 
 | Property Name | Type | Default | Description |
@@ -361,6 +432,7 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 
 
 <a name="semantic-alias"></a>
+
 ## Semantic Alias directives and methods
 Vue Simple ACL also provides some directives and methods in different verb as alias for default directive and helper function. You can use these aliases in place of `v-can` directive, `$can` helper function and vue router `can:` meta property for better semantic. See below table.
 
@@ -372,6 +444,7 @@ Vue Simple ACL also provides some directives and methods in different verb as al
 
 
 <a name="options"></a>
+
 ## Vue Simple ACL Options 
  can be a user OBJECT, FUNCTION returning a user object
 // or an Asynchronous function returning a PROMISE of user object, suitable for performing fetch from API.
@@ -382,17 +455,20 @@ Vue Simple ACL also provides some directives and methods in different verb as al
 | **rules** | `function` | Yes | None | function returning instance of `defineAclRules()` e.g `() => defineAclRules((setRule) => {...}` |
 | **directiveName** | `object` or a `function` returning user object | No | `'can'` |  You can set a custom directive name if the default name conflicts with other installed plugins. e.g `'custom-can'` then in component like `v-custom-can=""` |
 | **helperName** | `object` or a `function` returning user object | No | `'$can'` | You can set a custom helper name if the default name conflicts with other installed plugins. e.g `'$customCan'`, then use in component like `'$customCan()'` or `'$customCan.not()'` |
+| **enableSematicAlias** | `boolean` | No | `true` | You can enable or disable the sematic alias directives and methods e.g `v-role`, `v-permission`, `$acl.*`, etc. [See Semantic Alias](#sematic-alias)
 | **router** | `vue-router` | No | None | Inte |
 | **onDeniedRoute** | `string` or `object` | No | `/` | A route to redirect to when `can` evaluation is denied. e.g string path `'/unauthorized'` OR router option `{ path: '/unauthorized' }` OR `{ name: 'unauthorizedPage', replace: true }` OR special value `'$from'` which returns back to the request URI |
 
 
 <a name="todo"></a>
+
 ## TODO
 
 1. Chore: Write basic tests
 2. A documentation page with vitepress
 
 <a name="contributing"></a>
+
 ## 🤝 Contributing
 
 1. Fork this repository.
@@ -405,12 +481,14 @@ Vue Simple ACL also provides some directives and methods in different verb as al
 
 
 <a name="support"></a>
+
 ## ⭐️ Support
 
 If you like this project, You can support me with starring ⭐ this repository, [buy me a coffee](https://www.patreon.com/victoryosayi) or [become a patron](https://www.patreon.com/victoryosayi).
 
 
 <a name="license"></a>
+
 ## 📄 License
 
 [MIT](LICENSE)

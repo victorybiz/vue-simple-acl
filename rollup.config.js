@@ -14,31 +14,44 @@ import typescript from '@rollup/plugin-typescript';
 export default [
   // Vue 3
   {
-    input: "src/VueSimpleAcl.ts",
+    input: "src/index.ts",
+    external: ['vue'],
     output: [
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.js",
         format: "umd",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },     
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.esm.js",
         format: "es",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.cjs.js",
         format: "cjs",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.min.js",
         format: "iife",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       }
     ],
     plugins: [
@@ -49,13 +62,13 @@ export default [
       css(),
       // auto(),
       resolve({ browser: true}),
-      terser(),
+      // terser(),
       typescript({
-        exclude: ['src/main.ts', 'src/*.vue', 'node_modules/**']
+        exclude: ['node_modules/**', 'playground/**']
         // use lib: and target: config in tsconfig.json
       }),
       alias({
-        resolve: ['.js', '.ts'],
+        resolve: ['.js', '.jsx', '.ts', '.tsx'],
         entries: [
           { find: 'vue', replacement: 'vue' }
         ]
@@ -63,38 +76,51 @@ export default [
     ],
     watch: {
       // include: 'src/**',
-      exclude: ['src/main.ts', 'src/*.vue', 'node_modules/**']
+      exclude: ['node_modules/**', 'playground/**']
     }
   },
   // Vue 2
   {
-    input: "src/VueSimpleAcl.ts",
+    input: "src/index.ts",
+    // external: ['vue'],
     output: [
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.js",
         format: "umd",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.esm.js",
         format: "es",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },      
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.cjs.js",
         format: "cjs",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       },
       {
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.min.js",
         format: "iife",
-        sourcemap: true
+        sourcemap: true,
+        globals: {
+          vue: 'Vue'
+        }
       }
-    ],
+    ],    
     plugins: [
       commonjs(),
       VuePlugin({
@@ -105,11 +131,11 @@ export default [
       resolve({ browser: true}),
       terser(),
       typescript({
-        exclude: ['src/main.ts', 'src/*.vue', 'node_modules/**']
+        exclude: ['node_modules/**', 'playground/**']
         // use lib: and target: config in tsconfig.json        
       }),
       alias({
-        resolve: ['.js', '.ts'],
+        resolve: ['.js', '.jsx', '.ts', '.tsx'],
         entries: [
           { find: 'vue', replacement: '@vue/composition-api' }
         ]
@@ -117,7 +143,7 @@ export default [
     ],
     watch: {
       // include: 'src/**',
-      exclude: ['src/main.ts', 'src/*.vue', 'node_modules/**']
+      exclude: ['node_modules/**', 'playground/**']
     }
   }
 ]
