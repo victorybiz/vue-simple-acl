@@ -21,7 +21,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.js",
         format: "umd",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -30,7 +30,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.esm.js",
         format: "es",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -39,7 +39,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.cjs.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -48,7 +48,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.min.js",
         format: "iife",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -62,7 +62,7 @@ export default [
       css(),
       // auto(),
       resolve({ browser: true}),
-      // terser(),
+      (process.env.NODE_ENV === 'production' && terser()), // terser()
       typescript({
         exclude: ['node_modules/**', 'playground/**']
         // use lib: and target: config in tsconfig.json
@@ -88,7 +88,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.js",
         format: "umd",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -97,7 +97,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.esm.js",
         format: "es",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -106,7 +106,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.cjs.js",
         format: "cjs",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -115,7 +115,7 @@ export default [
         name: 'VueSimpleAcl',
         file: "dist/vue-simple-acl.vue2.min.js",
         format: "iife",
-        sourcemap: true,
+        sourcemap: (process.env.NODE_ENV === 'production' ? false : 'inline'),
         globals: {
           vue: 'Vue'
         }
@@ -129,7 +129,7 @@ export default [
       css(),
       // auto(),
       resolve({ browser: true}),
-      terser(),
+      (process.env.NODE_ENV === 'production' && terser()), // terser()
       typescript({
         exclude: ['node_modules/**', 'playground/**']
         // use lib: and target: config in tsconfig.json        

@@ -1,6 +1,6 @@
 {
   "name": "vue-simple-acl",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "A simple unopinionated Vue plugin for managing user roles and permissions, access-control list (ACL) and role-based access control (RBAC).",
   "main": "dist/vue-simple-acl.js",
   "browser": "dist/vue-simple-acl.min.js",
@@ -13,7 +13,7 @@
   ],
   "scripts": {
     "dev": "vite",
-    "build": "npm run build:package",
+    "build": "NODE_ENV=production npm run build:package",
     "build:vite": "vuedx-typecheck . && vite build",
     "serve": "vite preview",
     "build:package": "rollup --config rollup.config.js",
