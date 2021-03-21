@@ -102,7 +102,7 @@ app.mount("#app");
 <a name="usage-vue2"></a>
 
 ### Usage with Vue 2
-In Vue 2, when using User data from reactive store/Vuex wrapped with `computed()`, which is available in Vue 3 module by default but not in Vue 2, make sure to install [@vue/composition-api](https://github.com/vuejs/composition-api#npm) first and change the imported module to: `import { computed } from '@vue/composition-api'`
+In Vue 2, when using User data from reactive Store/Vuex wrapped with `computed()` function, which is available in Vue 3 as module by default but not in Vue 2, make sure to install [@vue/composition-api](https://github.com/vuejs/composition-api#npm) first and change the imported module to: `import { computed } from '@vue/composition-api'`
 ```javascript
 // src/main.js  OR  src/main.ts
 
@@ -132,12 +132,15 @@ import router from "../router";
 // Import store if you are using reactive Store/Vuex as User data source
 import store from "../store";
 
-// ----- VUE 3 Import -----
+// ----- VUE 3 Imports -----
 import { computed } from 'vue'; // For VUE 3
 import { createAcl, defineAclRules } from 'vue-simple-acl';
 
-// ----- VUE 2 Import -----
-import { computed } from '@vue/composition-api'; // Ensure this is installed
+// ----- VUE 2 Imports -----
+import Vue from 'vue';
+import VueCompositionAPI from '@vue/composition-api'; // Ensure this is installed
+Vue.use(VueCompositionAPI); // VueCompositionAPI must be used as plugin before any function, otherwise see your console if warning/errpr
+import { computed } from '@vue/composition-api'; // import computed function
 import { createAcl, defineAclRules } from 'vue-simple-acl/dist/vue-simple-acl.vue2';
 
 // ---------------
