@@ -23,7 +23,7 @@ const routes = [
     path:'/post/:id',
     component: About,
     meta: {
-      can: (to, from, can) => {        
+      can: (to, from, can, user) => {       
         return can('edit-post', { id: 100, user_id: 2 });
         // return axios.get(`/api/posts/${to.params.id}`)
         //   .then((response) => can('edit-post', response.data));

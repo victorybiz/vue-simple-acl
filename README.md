@@ -23,24 +23,35 @@ A simple unopinionated Vue plugin for managing user roles and permissions, acces
 </div>
 
 ## Table of Contents
-* [Features](#features)
-* [Installation](#installation)
-* [Usage](#usage)
-  * [Usage with Vue 3](#usage-vue3)
-  * [Usage with Vue 2](#usage-vue2)
-  * [ACL Rules File](#acl-file)
-  * [Usage in component](#usage-in-component)
-  * [Using helper function in component](#using-helper)
-  * [Using helper function in `setup` Vue's Composition API](#composition-api)
-  * [Middleware for Vue Router](#middleware-for-vue-router)
-    * [`onDeniedRoute` meta property](#vue-router-ondeniedroute)
-    * [Vue Router `meta` Properties](#vue-router-meta)
-* [Semantic Alias methods and directives](#semantic-alias)
-* [Vue Simple ACL Options](#options)
-* [TODO](#todo)
-* [Contributing](#contributing)
-* [Support](#support)
-* [License](#license)
+- [Vue Simple ACL](#vue-simple-acl)
+  - [Table of Contents](#table-of-contents)
+  - [Features](#features)
+  - [Installation](#installation)
+      - [NPM](#npm)
+      - [Yarn](#yarn)
+      - [CDN](#cdn)
+  - [Usage](#usage)
+    - [Usage with Vue 3](#usage-with-vue-3)
+    - [Usage with Vue 2](#usage-with-vue-2)
+    - [ACL Rules File](#acl-rules-file)
+    - [Usage in component](#usage-in-component)
+      - [`hide` modifier](#hide-modifier)
+      - [`disable` modifier](#disable-modifier)
+      - [`readonly` modifier](#readonly-modifier)
+      - [`not` modifier](#not-modifier)
+      - [`any` modifier](#any-modifier)
+    - [Using helper function in component](#using-helper-function-in-component)
+    - [Using helper function in `setup` Vue's Composition API](#using-helper-function-in-setup-vues-composition-api)
+    - [Middleware for Vue Router](#middleware-for-vue-router)
+      - [`onDeniedRoute` meta property](#ondeniedroute-meta-property)
+      - [$from as value `onDeniedRoute`](#from-as-value-ondeniedroute)
+    - [Vue Router `meta` Properties](#vue-router-meta-properties)
+  - [Semantic Alias directives and methods](#semantic-alias-directives-and-methods)
+  - [Vue Simple ACL Options](#vue-simple-acl-options)
+  - [TODO](#todo)
+  - [🤝 Contributing](#-contributing)
+  - [⭐️ Support](#️-support)
+  - [📄 License](#-license)
 
 
 <br>
@@ -51,7 +62,7 @@ A simple unopinionated Vue plugin for managing user roles and permissions, acces
 - Vue 2 and Vue 3 support
 - Simple but robust and power ACL plugin
 - Manage roles and permissions with ease.
-- Lightweight (<10 kB zipped)
+- Lightweight (<3 kB zipped)
 - Component `v-can` directive
 - Global `$can` helper function
 - Sematic alias methods and directives of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
@@ -59,7 +70,7 @@ A simple unopinionated Vue plugin for managing user roles and permissions, acces
 - Support user data from plain object, vuex store and asynchronous function.
 - Reactive changes of abilities and permissions
 - Define custom ACL rules
-- TypeScript Support
+- Fully Typecript: The source code is written entirely in TypeScript.
 - Fully configurable
 
 <a name="installation"></a>
@@ -90,10 +101,12 @@ yarn add vue-simple-acl
 
 import { createApp } from 'vue'
 import App from './App.vue'
+import router from './store';
 import store from './store';
 import acl from './acl'; // import the instance of the defined ACL
 
 const app = createApp(App);
+app.use(router);
 app.use(store);
 app.use(acl); // install vue-simple-acl
 app.mount("#app");
@@ -108,14 +121,17 @@ In Vue 2, when using User data from reactive Store/Vuex wrapped with `computed()
 
 import Vue from 'vue'
 import App from './App.vue'
+import router from './router';
 import store from './store';
 import acl from './acl'; // import the instance of the defined ACL
 
 Vue.config.productionTip = false;
 
-Vue.use(store);
 Vue.use(acl); // install vue-simple-acl
+
 new Vue({
+  router,
+  store,
   render: h => h(App),
 }).$mount('#app')
 ```
@@ -306,7 +322,7 @@ export default {
       // Execute this block if user is admin OR can delete post
     }
 
-    // Get data of the ACL User being validated
+    // Get data of the defined ACL User being validated
     const user = acl.user;
   }
 }
@@ -404,6 +420,20 @@ or using `any` modifier
   }
 }
 ```
+or get the data of the defined ACL user in the evaluations by passing `user` as the optional **fourth** argument to the defined ACL meta function
+```javascript
+{
+  path: 'posts/:postId/publish',
+  component: ManagePost,
+  meta: {
+    anyCan: (to, from, anyCan, user) => {        
+      return axios.get(`/api/users/${user.id}/posts/${to.params.id}/publish`)
+        .then((response) => anyCan(['is-admin', ['edit-post', response.data]]));
+    },
+    onDeniedRoute: '/unauthorized'
+  }
+}
+```
 
 <a name="vue-router-ondeniedroute"></a>
 
@@ -428,9 +458,9 @@ You can set the onDeniedRoute to the special value `'$from'` which will return t
 
 | Property Name | Type | Default | Description |
 | --- | --- | --- | --- |
-| **can** or **allCan**| `string` OR `array` of abilities or `function (to, from, can)` of async evaluation | None | Equivalent of `$can()` and `v-can=""` |
-| **notCan** or **canNot** | `string` OR `array` of abilities or `function (to, from, notCan)` of async evaluation | None | Equivalent of `$can.not()` and `v-can.not=""` |
-| **anyCan** or **canAny**| `string` OR `array` of abilities or `function (to, from, anyCan)` of async evaluation | None | Equivalent of `$can.any()` and `v-can.any=""` |
+| **can** or **allCan**| `string` OR `array` of abilities OR `function` of asynchronous evaluation: <span style="white-space:nowrap;">`(to, from, can, user?) => {}`</span> | None | Equivalent of `$can()` and `v-can=""` |
+| **notCan** or **canNot** | `string` OR `array` of abilities OR `function` of asynchronous evaluation: <span style="white-space:nowrap;">`(to, from, notCan, user?)`</span> | None | Equivalent of `$can.not()` and `v-can.not=""` |
+| **anyCan** or **canAny**| `string` OR `array` of abilities OR `function` of asynchronous evaluation: <span style="white-space:nowrap;">`(to, from, anyCan, user?)`</span> | None | Equivalent of `$can.any()` and `v-can.any=""` |
 | **onDeniedRoute** | `string` OR `object` of `route()` option | Value of the default option `onDeniedRoute`  | A route to redirect to when `can|notCan|anyCan` evaluation is denied. e.g string path `'/unauthorized'` OR router option `{ path: '/unauthorized' }` OR `{ name: 'unauthorizedPage', replace: true }` OR special value **`'$from'`** which returns back to the request URI |
 
 
@@ -444,6 +474,7 @@ Vue Simple ACL also provides some directives and methods in different verb as al
 | Permission | As Directives:<br>`v-permission:create-post`<br>`v-permission="'create-post'"`<br> `v-permission.not="'create-post'"`<br> `v-permission.any="['create-post', ['edit-post', post]]"` <br><br> In Component:<br> `$acl.permission('create-post')`<br> `$acl.notPermission('create-post')`<br> `$acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Option API:<br> `this.$acl.permission('create-post')`<br> `this.$acl.notPermission('create-post')`<br> `this.$acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.permission('create-post')`<br> `acl.notPermission('create-post')`<br> `acl.anyPermission(['create-post', ['edit-post', post]])` <br><br> In Vue Router `meta` Property:<br> `permission: 'create-post'`<br> `notPermission: ['create-post', 'create-category']` <br><br> `anyPermission: (to, from, anyPermission) => {`<br>&nbsp;&nbsp;`return axios.get(`\``/api/posts/${to.params.id}`\``)`<br>&nbsp;&nbsp;`.then((response) => anyPermission(['create-post', ['edit-post', response.data]]));`<br>`}` |
 | Role | As Directives:<br>`v-role:admin`<br>`v-role="'admin'"`<br> `v-role.not="'editor'"`<br> `v-role.any="['admin', 'editor']"` <br><br> In Component:<br> `$acl.role('admin')`<br> `$acl.notRole('editor')`<br> `$acl.anyRole(['admin', 'editor'])` <br><br> In Option API:<br> `this.$acl.role('admin')`<br> `this.$acl.notRole('editor')`<br> `this.$acl.anyRole(['admin', 'editor'])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.role('admin')`<br> `acl.notRole('editor')`<br> `acl.anyRole(['admin', 'editor'])` <br><br> In Vue Router `meta` Property:<br> `role: 'admin'`<br> `notRole: 'editor'` <br> `anyRole: ['admin', 'editor']` |
 | Role Or Permission | As Directives:<br>`v-role-or-permission="['admin', 'create-post']"`<br> `v-role-or-permission.not="['editor', 'create-post']"`<br> `v-role-or-permission.any="['admin', 'create-post', ['edit-post', post]]"` <br><br> In Component:<br> `$acl.roleOrPermission(['admin', 'create-post'])`<br> `$acl.notRoleOrPermission(['editor', 'create-post'])`<br> `$acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Option API:<br> `this.$acl.roleOrPermission(['admin', 'create-post'])`<br> `this.$acl.notRoleOrPermission(['editor', 'create-post'])`<br> `this.$acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.roleOrPermission(['admin', 'create-post'])`<br> `acl.notRoleOrPermission(['editor', 'create-post'])`<br> `acl.anyRoleOrPermission(['admin', 'create-post', ['edit-post', post]])` <br><br> In Vue Router `meta` Property:<br> `roleOrPermission: ['admin', 'create-post']`<br> `notRoleOrPermission: ['editor', 'create-post', 'create-category']` <br><br> `anyRoleOrPermission: (to, from, anyRoleOrPermission) => {`<br>&nbsp;&nbsp;`return axios.get(`\``/api/posts/${to.params.id}`\``)`<br>&nbsp;&nbsp;`.then((response) => anyRoleOrPermission(['admin', 'create-post', ['edit-post', response.data]]));`<br>`}` |
+| User | Get the data of the defined ACL user. <br><br> In Component:<br> `$acl.user; // returns user object` <br><br> In Option API:<br> `this.$acl.user; // returns user object` <br><br> In Composition API/`setup()`:<br> `const acl = useAcl();`<br> `acl.user; // returns user object` <br><br> In Vue Router `meta` Property:<br> _Pass `user` as the fourth argument to the defined ACL meta function_ <br><br> `roleOrPermission: (to, from, roleOrPermission, user) => {`<br>&nbsp;&nbsp;`return axios.get(`\``/api/users/${user.id}/posts/${to.params.id}`\``)`<br>&nbsp;&nbsp;`.then((response) => roleOrPermission(['admin', ['edit-post', response.data]]));`<br>`}` |
 
 
 <a name="options"></a>

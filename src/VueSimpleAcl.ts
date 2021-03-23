@@ -1,4 +1,4 @@
-import { reactive } from 'vue';
+import { reactive, computed } from 'vue';
 import { getFunctionArgsNames, capitalize } from './utils';
 import { State, PluginOption, Ability, AbilityArgs, AbilitiesEvaluationProps } from './@types';
 
@@ -432,6 +432,18 @@ export const installPlugin = (app: any, options?: PluginOption) => {
     registerHelper(app, 'roles', isVue3, true);
     registerHelper(app, 'roleOrPermission', isVue3, true);
     registerHelper(app, 'roleOrPermissions', isVue3, true);
+    // Add user data to the global variable as property     
+    if (isVue3) {
+      if (!app.config.globalProperties.$acl) {
+        app.config.globalProperties.$acl = {};
+      }
+      app.config.globalProperties.$acl.user = computed(() => state.registeredUser).value;
+    } else {
+      if (!app.prototype.$acl) {
+        app.prototype.$acl = {};
+      }
+      app.prototype.$acl.user = computed(() => state.registeredUser).value;
+    }    
   }
   
 
@@ -463,8 +475,13 @@ export const installPlugin = (app: any, options?: PluginOption) => {
       if (to.meta && (to.meta.can || to.meta.permission || to.meta.role || to.meta.roleOrPermission)) {
         const abilities = (to.meta.can || to.meta.permission || to.meta.role || to.meta.roleOrPermission);
         let granted = false;
-        if (typeof abilities === 'function') {              
-          granted = abilities(to, from, canHelperHandler);
+        if (typeof abilities === 'function') {      
+          const funcArgs = getFunctionArgsNames(abilities); 
+          if (Array.isArray(funcArgs) && funcArgs.length === 4) {
+            granted = abilities(to, from, canHelperHandler, state.registeredUser);
+          } else {
+            granted = abilities(to, from, canHelperHandler);
+          }          
         } else {
           granted = canHelperHandler(abilities)
         }            
@@ -474,7 +491,12 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         const abilities = (to.meta.canAll || to.meta.allCan || to.meta.allPermission || to.meta.allRole || to.meta.allRoleOrPermission);
         let granted = false;
         if (typeof abilities === 'function') {              
-          granted = abilities(to, from, canHelperHandler);
+          const funcArgs = getFunctionArgsNames(abilities); 
+          if (Array.isArray(funcArgs) && funcArgs.length === 4) {
+            granted = abilities(to, from, canHelperHandler, state.registeredUser);
+          } else {
+            granted = abilities(to, from, canHelperHandler);
+          } 
         } else {
           granted = canHelperHandler(abilities)
         }            
@@ -484,7 +506,12 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         const abilities = (to.meta.cannot || to.meta.canNot || to.meta.notCan || to.meta.notPermission || to.meta.notRole || to.meta.notRoleOrPermission);
         let granted = false;
         if (typeof abilities === 'function') {              
-          granted = abilities(to, from, notCanHelperHandler);
+          const funcArgs = getFunctionArgsNames(abilities); 
+          if (Array.isArray(funcArgs) && funcArgs.length === 4) {
+            granted = abilities(to, from, notCanHelperHandler, state.registeredUser);
+          } else {
+            granted = abilities(to, from, notCanHelperHandler);
+          } 
         } else {
           granted = notCanHelperHandler(abilities)
         }            
@@ -494,7 +521,12 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         const abilities = (to.meta.canAny || to.meta.anyCan || to.meta.anyPermission || to.meta.anyRole|| to.meta.anyRoleOrPermission);
         let granted = false;
         if (typeof abilities === 'function') {              
-          granted = abilities(to, from, anyCanHelperHandler)
+          const funcArgs = getFunctionArgsNames(abilities); 
+          if (Array.isArray(funcArgs) && funcArgs.length === 4) {
+            granted = abilities(to, from, anyCanHelperHandler, state.registeredUser);
+          } else {
+            granted = abilities(to, from, anyCanHelperHandler);
+          } 
         } else {
           granted = anyCanHelperHandler(abilities);
         }            
@@ -558,7 +590,7 @@ export const defineAclRules = (aclRulesCallback: Function): void => {
 */
 export const useAcl = () => {
   let acl: any = {};
-  acl.user = state.registeredUser;
+  acl.user = computed(() => state.registeredUser).value;
   // 
   acl.can = canHelperHandler;
   acl.can.not = notCanHelperHandler;

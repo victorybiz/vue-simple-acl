@@ -26,7 +26,7 @@
   <br>
   <input v-can:edit-post.disabled="post2" v-model="postTitle" type="text">
   <br>...
-  {{ $acl }}
+  {{ $acl.user }}
   <div v-if="$acl.role('edit-post', post)">
     #1. HELPER: USER-1 can create POST
   </div> 
@@ -71,8 +71,9 @@ export default defineComponent({
     } else {
       console.log('User CAN NOT edit post');
     }
+    console.log(acl.user);
+    
 
-    // console.log(acl)
 
     return { 
       post,
