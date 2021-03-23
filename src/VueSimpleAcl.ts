@@ -589,7 +589,7 @@ export const defineAclRules = (aclRulesCallback: Function): void => {
 * @return object
 */
 export const useAcl = () => {
-  let acl: any = {};
+  let acl: any = reactive({});
   acl.user = computed(() => state.registeredUser).value;
   // 
   acl.can = canHelperHandler;
