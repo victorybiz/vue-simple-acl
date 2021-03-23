@@ -438,11 +438,13 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         app.config.globalProperties.$acl = {};
       }
       app.config.globalProperties.$acl.user = computed(() => state.registeredUser).value;
+      app.config.globalProperties.$acl.getUser = () => state.registeredUser;
     } else {
       if (!app.prototype.$acl) {
         app.prototype.$acl = {};
       }
       app.prototype.$acl.user = computed(() => state.registeredUser).value;
+      app.prototype.$acl.getUser = () => state.registeredUser;;
     }    
   }
   
@@ -589,8 +591,9 @@ export const defineAclRules = (aclRulesCallback: Function): void => {
 * @return object
 */
 export const useAcl = () => {
-  let acl: any = reactive({});
+  let acl: any = {};
   acl.user = computed(() => state.registeredUser).value;
+  acl.getUser = () => state.registeredUser;
   // 
   acl.can = canHelperHandler;
   acl.can.not = notCanHelperHandler;
@@ -621,5 +624,5 @@ export const useAcl = () => {
   acl.anyRoleOrPermission = anyCanHelperHandler;
   acl.roleOrPermission.not = notCanHelperHandler;
   acl.roleOrPermission.any = anyCanHelperHandler;
-  return acl;
+  return reactive(acl);
 }
