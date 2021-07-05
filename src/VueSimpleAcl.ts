@@ -1,4 +1,4 @@
-import { reactive, computed } from 'vue';
+import { reactive, computed, Plugin } from 'vue';
 import { getFunctionArgsNames, capitalize } from './utils';
 import { State, PluginOption, Ability, AbilityArgs, AbilitiesEvaluationProps } from './@types';
 
@@ -11,7 +11,7 @@ const state = reactive({
 
 /**
  * Register plugin options to state
- * @param pluginOptions 
+ * @param pluginOptions
  * @return void
  */
 const registerPluginOptions = (pluginOptions: PluginOption): void => {
@@ -20,7 +20,7 @@ const registerPluginOptions = (pluginOptions: PluginOption): void => {
     state.registeredUser = pluginOptions.user();
   } else {
     state.registeredUser = pluginOptions.user;
-  }   
+  }
   // Run and init the defined rules
   if (pluginOptions.rules && typeof pluginOptions.rules === "function") {
     pluginOptions.rules();
@@ -33,8 +33,8 @@ const registerPluginOptions = (pluginOptions: PluginOption): void => {
 /**
  * Add an ability and its callback to rules state
  * @param ability
- * @param callback 
- * @return void 
+ * @param callback
+ * @return void
  */
 const addAclAbility = (ability: string, callback: Function): void => {
   if (!state.registeredRules.hasOwnProperty(ability)) {
@@ -46,14 +46,14 @@ const addAclAbility = (ability: string, callback: Function): void => {
 
 /**
  * Set an ACL Rule
- * @param abilities 
- * @param callback 
+ * @param abilities
+ * @param callback
  * @return void
  */
 const setRule = (abilities: Ability, callback: Function): void => {
   if (typeof abilities === "string") {
     addAclAbility(abilities, callback);
-  } else if (typeof abilities === "object" && Array.isArray(abilities)) {     
+  } else if (typeof abilities === "object" && Array.isArray(abilities)) {
     Object.values(abilities).forEach((ability) => {
       addAclAbility(ability, callback);
     });
@@ -76,7 +76,7 @@ const evaluateAbilityCallback = (abilityCallback: Function, ability: Ability, ar
         return abilityCallback(state.registeredUser, ...args);
       } else {
         return abilityCallback(state.registeredUser);
-      }  
+      }
     }
     return false;
   } catch (error) {
@@ -113,7 +113,7 @@ const evaluateAbilityCallback = (abilityCallback: Function, ability: Ability, ar
 
 /**
  * Check ACL Abilities
- * @param object 
+ * @param object
  * @return boolean
  */
 const checkAclAbilities = ({ abilities, args, any = false }: AbilitiesEvaluationProps): boolean => {
@@ -138,45 +138,45 @@ const checkAclAbilities = ({ abilities, args, any = false }: AbilitiesEvaluation
           checkStatus = true;
         }
         counter++;
-      }    
+      }
     });
     if (counter > 0 && counter === validCount) {
       checkStatus = true;
     }
     return checkStatus;
-  } 
+  }
   return false;
 };
 
 /**
  * Prepare ACL Check
  * @param object
- * @return boolean 
+ * @return boolean
  */
 const prepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps): boolean => {
   const aclAbilities = abilities;
   const aclArgs = args;
   const anyModifier = any;
-  
+
   let aclStatus = false;
   if (aclAbilities) {
-    if (aclArgs) {            
-      // v-can:edit-post="post" OR $can('edit-post', post) 
+    if (aclArgs) {
+      // v-can:edit-post="post" OR $can('edit-post', post)
       // OR v-can:hide-comment="[post, comment]" OR $can('hide-commen', [post, comment])
       aclStatus = checkAclAbilities({ abilities: aclAbilities, args: aclArgs });
     } else {
       // v-can:create-post OR $can('create-post')
       aclStatus = checkAclAbilities({ abilities: aclAbilities} );
-    }       
+    }
   } else {
     if (aclArgs && typeof aclArgs === 'string') {
       // v-can="'create-post'" OR $can('create-post')
       aclStatus = checkAclAbilities({ abilities: aclArgs});
     } else if (aclArgs && aclArgs !== null && typeof aclArgs === 'object') {
       // v-can="['edit-post', post]" OR $can(['edit-post', post])
-      let argsCount = (Array.isArray(aclArgs)) ? aclArgs.length : Object.keys(aclArgs).length;        
+      let argsCount = (Array.isArray(aclArgs)) ? aclArgs.length : Object.keys(aclArgs).length;
       if (argsCount === 2 && typeof aclArgs[0] === 'string' && typeof aclArgs[1] === 'object' && !Array.isArray(aclArgs[1])) {
-        aclStatus = checkAclAbilities({ abilities: aclArgs[0], args: aclArgs[1] });          
+        aclStatus = checkAclAbilities({ abilities: aclArgs[0], args: aclArgs[1] });
       } else {
         // v-can="['create-post', ['edit-post', post]]" OR $can(['create-post', ['edit-post', post]])
         let abilityList: any[] = [];
@@ -199,12 +199,12 @@ const prepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps):
             });
             if (abilityInValue) {
               abilityList.push({ abilities: abilityInValue, args: argsInvalue });
-            }                
+            }
           }
         });
         aclStatus = checkAclAbilities({ abilities: abilityList, args: argList, any: anyModifier });
       }
-    }          
+    }
   }
   return aclStatus
 }
@@ -212,16 +212,16 @@ const prepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps):
 /**
  * Parse helper arguments to Prepare ACL
  * @param object
- * @return {boolean} 
+ * @return {boolean}
  */
 const helperArgsToPrepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps): boolean => {
   if (abilities && typeof abilities === 'string') {
     return prepareAcl({
       abilities: abilities,
       args: args,
-      any: any 
-    });     
-  } else if (typeof abilities === 'object') {     
+      any: any
+    });
+  } else if (typeof abilities === 'object') {
     return prepareAcl({
       abilities: null,
       args: abilities, // Parse abilities as args since the specified value of abilities is object/array
@@ -234,9 +234,9 @@ const helperArgsToPrepareAcl = ({ abilities, args, any = false }: AbilitiesEvalu
 
 /**
  * can Helper Handler
- * @param abilities 
+ * @param abilities
  * @param args arguments
- * @return boolean 
+ * @return boolean
  */
 const canHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean => {
   return helperArgsToPrepareAcl({ abilities: abilities, args: args, any: false });
@@ -244,7 +244,7 @@ const canHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean => {
 
 /**
  * can.not Helper Handler
- * @param abilities 
+ * @param abilities
  * @param args arguments
  * @return boolean
  */
@@ -254,7 +254,7 @@ const notCanHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean =>
 
 /**
  * can.any Helper Handler
- * @param abilities 
+ * @param abilities
  * @param args arguments
  * @return boolean
  */
@@ -265,8 +265,8 @@ const anyCanHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean =>
 
 /**
  * Install the plugin
- * @param app 
- * @param options 
+ * @param app
+ * @param options
  * @return void
  */
 export const installPlugin = (app: any, options?: PluginOption) => {
@@ -281,54 +281,54 @@ export const installPlugin = (app: any, options?: PluginOption) => {
     directiveName: 'can',
     helperName: '$can',
     enableSematicAlias: true
-    // enableAlias: true,   
+    // enableAlias: true,
   }
   const pluginOptions: PluginOption = { ...defaultPluginOptions, ...options };
-  
+
   // Sanitize directive name should the developer specified a custom name
   if (pluginOptions.directiveName && typeof pluginOptions.directiveName === "string") {
     if (pluginOptions.directiveName.startsWith('v-')) {
       pluginOptions.directiveName = pluginOptions.directiveName.substr(2, pluginOptions.directiveName.length);
-    }      
+    }
   }
 
   // Sanitize helper name should the developer specified a custom name
   if (pluginOptions.helperName && typeof pluginOptions.helperName === "string") {
     if (pluginOptions.helperName.charAt(0) !== '$') {
       pluginOptions.helperName = '$' + pluginOptions.helperName;
-    }      
+    }
   }
-  
+
   // Register the plugin options to state
   if (typeof pluginOptions.user === 'function' && pluginOptions.user() instanceof Promise) {
     // when defined user is Asynchronous object or function
     // It requires instance of a vue-router. See below for a router hook for async promise evaluation
-    hasAsyncUser = true;      
+    hasAsyncUser = true;
   } else {
     // when defined user is an object or function but non-Asynchronous
     registerPluginOptions(pluginOptions);
   }
-  
+
   // directive handler function
   const directiveHandler = (el: any, binding: any, vnode: any) => {
     const aclAbilities = binding.arg;
     const aclArgs = binding.value;
-    const aclModifiers = binding.modifiers;        
+    const aclModifiers = binding.modifiers;
 
     const anyModifier = (aclModifiers.any) ? true : false;
     const notModifier = (aclModifiers.not) ? true : false;
     const readonlyModifier = (aclModifiers.readonly) ? true : false;
     const disableModifier = (aclModifiers.disable || aclModifiers.disabled) ? true : false;
     const hideModifier = (aclModifiers.hide || aclModifiers.hidden) ? true : false;
-    
+
     // call to prepare ACL and check abilities
     let aclStatus = prepareAcl({ abilities: aclAbilities, args: aclArgs, any: anyModifier });
     if (aclStatus) {
       // ACL check is validm apply valid effect
-  
+
       // reverse the valid effect
       if (notModifier) {
-        el.style.display = 'none'; 
+        el.style.display = 'none';
       }
     } else {
         // v-can:edit-post.disabled="post"
@@ -345,7 +345,7 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         } else {
           el.style.display = 'none';
         }
-      }            
+      }
     }
   }
 
@@ -390,8 +390,8 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         app.config.globalProperties[name].all = (abilities: Ability, args?: AbilityArgs) => canHelperHandler(abilities, args);
         app.config.globalProperties[name].not = (abilities: Ability, args?: AbilityArgs) => notCanHelperHandler(abilities, args);
         app.config.globalProperties[name].any = (abilities: Ability, args?: AbilityArgs) => anyCanHelperHandler(abilities, args);
-      }        
-    } else { // Vue 2        
+      }
+    } else { // Vue 2
       if (isAlias) {
         if (!app.prototype.$acl) {
           app.prototype.$acl = {};
@@ -432,7 +432,7 @@ export const installPlugin = (app: any, options?: PluginOption) => {
     registerHelper(app, 'roles', isVue3, true);
     registerHelper(app, 'roleOrPermission', isVue3, true);
     registerHelper(app, 'roleOrPermissions', isVue3, true);
-    // Add user data to the global variable as property     
+    // Add user data to the global variable as property
     if (isVue3) {
       if (!app.config.globalProperties.$acl) {
         app.config.globalProperties.$acl = {};
@@ -445,9 +445,9 @@ export const installPlugin = (app: any, options?: PluginOption) => {
       }
       app.prototype.$acl.user = computed(() => state.registeredUser).value;
       app.prototype.$acl.getUser = () => state.registeredUser;;
-    }    
+    }
   }
-  
+
 
 
   // VUE ROUTER MIDDLEWARE EVALUATIONS
@@ -463,12 +463,12 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         }
         if (typeof onDeniedRoute === 'object') {
           next(onDeniedRoute)
-        } else {            
+        } else {
           if (onDeniedRoute === '$from') {
             next(from)
           } else {
             next({ path: `${onDeniedRoute}`, replace: true })
-          }            
+          }
         }
       }
     }
@@ -477,71 +477,71 @@ export const installPlugin = (app: any, options?: PluginOption) => {
       if (to.meta && (to.meta.can || to.meta.permission || to.meta.role || to.meta.roleOrPermission)) {
         const abilities = (to.meta.can || to.meta.permission || to.meta.role || to.meta.roleOrPermission);
         let granted = false;
-        if (typeof abilities === 'function') {      
-          const funcArgs = getFunctionArgsNames(abilities); 
+        if (typeof abilities === 'function') {
+          const funcArgs = getFunctionArgsNames(abilities);
           if (Array.isArray(funcArgs) && funcArgs.length === 4) {
             granted = abilities(to, from, canHelperHandler, state.registeredUser);
           } else {
             granted = abilities(to, from, canHelperHandler);
-          }          
+          }
         } else {
           granted = canHelperHandler(abilities)
-        }            
+        }
         routerRedirectHandler(to, from, next, granted);
 
       } else if (to.meta && (to.meta.canAll || to.meta.allCan || to.meta.allPermission || to.meta.allRole || to.meta.allRoleOrPermission)) {
         const abilities = (to.meta.canAll || to.meta.allCan || to.meta.allPermission || to.meta.allRole || to.meta.allRoleOrPermission);
         let granted = false;
-        if (typeof abilities === 'function') {              
-          const funcArgs = getFunctionArgsNames(abilities); 
+        if (typeof abilities === 'function') {
+          const funcArgs = getFunctionArgsNames(abilities);
           if (Array.isArray(funcArgs) && funcArgs.length === 4) {
             granted = abilities(to, from, canHelperHandler, state.registeredUser);
           } else {
             granted = abilities(to, from, canHelperHandler);
-          } 
+          }
         } else {
           granted = canHelperHandler(abilities)
-        }            
+        }
         routerRedirectHandler(to, from, next, granted);
 
       } else if (to.meta && (to.meta.cannot || to.meta.canNot || to.meta.notCan || to.meta.notPermission || to.meta.notRole || to.meta.notRoleOrPermission)) {
         const abilities = (to.meta.cannot || to.meta.canNot || to.meta.notCan || to.meta.notPermission || to.meta.notRole || to.meta.notRoleOrPermission);
         let granted = false;
-        if (typeof abilities === 'function') {              
-          const funcArgs = getFunctionArgsNames(abilities); 
+        if (typeof abilities === 'function') {
+          const funcArgs = getFunctionArgsNames(abilities);
           if (Array.isArray(funcArgs) && funcArgs.length === 4) {
             granted = abilities(to, from, notCanHelperHandler, state.registeredUser);
           } else {
             granted = abilities(to, from, notCanHelperHandler);
-          } 
+          }
         } else {
           granted = notCanHelperHandler(abilities)
-        }            
+        }
         routerRedirectHandler(to, from, next, granted);
 
       } else if (to.meta && (to.meta.canAny || to.meta.anyCan || to.meta.anyPermission || to.meta.anyRole|| to.meta.anyRoleOrPermission)) {
         const abilities = (to.meta.canAny || to.meta.anyCan || to.meta.anyPermission || to.meta.anyRole|| to.meta.anyRoleOrPermission);
         let granted = false;
-        if (typeof abilities === 'function') {              
-          const funcArgs = getFunctionArgsNames(abilities); 
+        if (typeof abilities === 'function') {
+          const funcArgs = getFunctionArgsNames(abilities);
           if (Array.isArray(funcArgs) && funcArgs.length === 4) {
             granted = abilities(to, from, anyCanHelperHandler, state.registeredUser);
           } else {
             granted = abilities(to, from, anyCanHelperHandler);
-          } 
+          }
         } else {
           granted = anyCanHelperHandler(abilities);
-        }            
+        }
         routerRedirectHandler(to, from, next, granted);
       } else {
         // Proceed to request route if no can|canNot|CanAny meta is set
         next();
-      }  
+      }
     }
-    
+
     // vue-router hook
-    pluginOptions.router.beforeEach((to: any, from: any, next: any) => { 
-      if (hasAsyncUser) {  
+    pluginOptions.router.beforeEach((to: any, from: any, next: any) => {
+      if (hasAsyncUser) {
         pluginOptions.user().then((user: PluginOption['user'])=> {
           pluginOptions.user = user;
           registerPluginOptions(pluginOptions);
@@ -549,7 +549,7 @@ export const installPlugin = (app: any, options?: PluginOption) => {
         }).catch((err: any) => {
           // Abort router
           console.warn(`:::VueSimpleACL::: Error while processing/retrieving 'user' data with the Asynchronous function.`)
-        });  
+        });
       } else {
         evaluateRouterAcl(to, from, next);
       }
@@ -564,10 +564,10 @@ export const installPlugin = (app: any, options?: PluginOption) => {
 
 /**
  * Create instance of Vue Simple ACL
- * @param userDefinedOptions 
+ * @param userDefinedOptions
  * @return object
  */
-export const createAcl = (userDefinedOptions: PluginOption): object => {
+export const createAcl = (userDefinedOptions: PluginOption): Plugin => {
   return {
     install: (app: any, options: any = {}) => {
         installPlugin(app, { ...options, ...userDefinedOptions });
@@ -594,30 +594,30 @@ export const useAcl = () => {
   let acl: any = {};
   acl.user = computed(() => state.registeredUser).value;
   acl.getUser = () => state.registeredUser;
-  // 
+  //
   acl.can = canHelperHandler;
   acl.can.not = notCanHelperHandler;
   acl.can.any = anyCanHelperHandler;
-  // 
+  //
   acl.notCan = notCanHelperHandler;
   acl.canNot = notCanHelperHandler;
   acl.cannot = notCanHelperHandler;
   acl.anyCan = anyCanHelperHandler;
-  // 
+  //
   acl.permission = canHelperHandler;
   acl.allPermission = canHelperHandler;
   acl.notPermission = notCanHelperHandler;
   acl.anyPermission = anyCanHelperHandler;
   acl.permission.not = notCanHelperHandler;
   acl.permission.any = anyCanHelperHandler;
-  // 
+  //
   acl.role = canHelperHandler;
   acl.allRole = canHelperHandler;
   acl.notRole = notCanHelperHandler;
   acl.anyRole = anyCanHelperHandler;
   acl.role.not = notCanHelperHandler;
   acl.role.any = anyCanHelperHandler;
-  // 
+  //
   acl.roleOrPermission = canHelperHandler;
   acl.allRoleOrPermission = canHelperHandler;
   acl.notRoleOrPermission = notCanHelperHandler;

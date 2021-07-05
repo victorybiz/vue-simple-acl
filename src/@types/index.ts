@@ -1,17 +1,13 @@
-// type User with properties and callable/call signature
-type User = {
-  [key: string]: any,
-  (): any, // callable / call Signature
-}
+
 
 export interface PluginOption {
-  user:  User | Function,
+  user:  Object | Function,
   rules: Function | null
   router: any,
-  onDeniedRoute: string,
-  directiveName: string,
-  helperName: string
-  enableSematicAlias: boolean
+  onDeniedRoute?: string,
+  directiveName?: string,
+  helperName?: string
+  enableSematicAlias?: boolean
 }
 
 export interface State {
