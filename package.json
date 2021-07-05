@@ -42,7 +42,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/victorybiz/vue-simple-acl"
+    "url": "git+https://github.com/h-roman/vue-simple-acl"
   },
   "keywords": [
     "vue",
@@ -62,10 +62,10 @@
     "javacript",
     "typescript"
   ],
-  "author": "Victory Osayi <lavictorybiz@gmail.com>",
+  "author": "Victory Osayi <lah-roman@gmail.com>",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/victorybiz/vue-simple-acl/issues"
+    "url": "https://github.com/h-roman/vue-simple-acl/issues"
   },
-  "homepage": "https://github.com/victorybiz/vue-simple-acl#readme"
+  "homepage": "https://github.com/h-roman/vue-simple-acl#readme"
 }
