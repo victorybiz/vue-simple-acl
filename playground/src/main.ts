@@ -55,7 +55,7 @@ const user = {
 //     .then((response) => response.data);
 // }
 
-const rules = () => defineAclRules((setRule) => {
+const rules = () => defineAclRules<typeof user>((setRule) => {
   setRule('create-post', (user) => user.is_admin || user.is_editor);
   setRule('is-admin', (user) => user.is_admin);
   setRule('is-editor', (user) => user.is_editor);

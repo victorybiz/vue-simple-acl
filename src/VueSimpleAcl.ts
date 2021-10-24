@@ -1,22 +1,24 @@
-import { reactive, computed } from 'vue';
-import { getFunctionArgsNames, capitalize } from './utils';
-import { State, PluginOption, Ability, AbilityArgs, AbilitiesEvaluationProps } from './@types';
+import { computed, reactive } from 'vue';
+
+import { Ability, AbilityArgs, PluginOption, State, User } from '../types';
+import { PluginOptionWithDefaults, AbilitiesEvaluationProps, Acl, AsyncUser, RuleSetter } from '../types/acl';
+import { capitalize, getFunctionArgsNames } from './utils';
 
 // plugin global state
 const state = reactive({
   registeredUser: {},
   registeredRules: {},
   options: {},
-} as State);
+} as State<unknown>);
 
 /**
  * Register plugin options to state
  * @param pluginOptions 
  * @return void
  */
-const registerPluginOptions = (pluginOptions: PluginOption): void => {
+const registerPluginOptions = <U = User>(pluginOptions: PluginOptionWithDefaults<U>): void => {
   // Init and set user to state
-  if (pluginOptions.user && typeof pluginOptions.user === "function") {
+  if (hasAsyncUser(pluginOptions.user)) {
     state.registeredUser = pluginOptions.user();
   } else {
     state.registeredUser = pluginOptions.user;
@@ -262,6 +264,15 @@ const anyCanHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean =>
   return helperArgsToPrepareAcl({ abilities: abilities, args: args, any: true });
 }
 
+/**
+ * Checks if the user has an async getter
+ * @param  {U|AsyncUser<U>} user
+ * @returns boolean
+ */
+const hasAsyncUser = <U = User>(user: U | AsyncUser<U>): user is AsyncUser<U> => {
+  return typeof user === 'function' && (user as any)() instanceof Promise;
+};
+
 
 /**
  * Install the plugin
@@ -269,11 +280,10 @@ const anyCanHelperHandler = (abilities: Ability, args?: AbilityArgs): boolean =>
  * @param options 
  * @return void
  */
-export const installPlugin = (app: any, options?: PluginOption) => {
+export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => {
 
   const isVue3: boolean = !!app.config.globalProperties;
-  let hasAsyncUser = false;
-  const defaultPluginOptions: PluginOption = {
+  const defaultPluginOptions: PluginOptionWithDefaults<U> = {
     user: Object.create(null),
     rules: null,
     router: null,
@@ -281,9 +291,8 @@ export const installPlugin = (app: any, options?: PluginOption) => {
     directiveName: 'can',
     helperName: '$can',
     enableSematicAlias: true
-    // enableAlias: true,   
   }
-  const pluginOptions: PluginOption = { ...defaultPluginOptions, ...options };
+  const pluginOptions: PluginOptionWithDefaults<U> = { ...defaultPluginOptions, ...options };
   
   // Sanitize directive name should the developer specified a custom name
   if (pluginOptions.directiveName && typeof pluginOptions.directiveName === "string") {
@@ -300,11 +309,7 @@ export const installPlugin = (app: any, options?: PluginOption) => {
   }
   
   // Register the plugin options to state
-  if (typeof pluginOptions.user === 'function' && pluginOptions.user() instanceof Promise) {
-    // when defined user is Asynchronous object or function
-    // It requires instance of a vue-router. See below for a router hook for async promise evaluation
-    hasAsyncUser = true;      
-  } else {
+  if (!hasAsyncUser(pluginOptions.user)) {
     // when defined user is an object or function but non-Asynchronous
     registerPluginOptions(pluginOptions);
   }
@@ -541,8 +546,8 @@ export const installPlugin = (app: any, options?: PluginOption) => {
     
     // vue-router hook
     pluginOptions.router.beforeEach((to: any, from: any, next: any) => { 
-      if (hasAsyncUser) {  
-        pluginOptions.user().then((user: PluginOption['user'])=> {
+      if (hasAsyncUser(pluginOptions.user)) {  
+        pluginOptions.user().then(user => {
           pluginOptions.user = user;
           registerPluginOptions(pluginOptions);
           evaluateRouterAcl(to, from, next);
@@ -555,7 +560,7 @@ export const installPlugin = (app: any, options?: PluginOption) => {
       }
     });
   } else { // No router
-    if (hasAsyncUser) {
+    if (hasAsyncUser(pluginOptions.user)) {
       console.error(`:::VueSimpleACL::: Instance of vue-router is required to define 'user' retrieved from a promise or Asynchronous function.`)
     }
   } // ./ Vue Router evaluation
@@ -567,10 +572,10 @@ export const installPlugin = (app: any, options?: PluginOption) => {
  * @param userDefinedOptions 
  * @return object
  */
-export const createAcl = (userDefinedOptions: PluginOption): object => {
+export const createAcl = <U = User>(userDefinedOptions: PluginOption<U>): any => {
   return {
     install: (app: any, options: any = {}) => {
-        installPlugin(app, { ...options, ...userDefinedOptions });
+      installPlugin(app, { ...options, ...userDefinedOptions });
     }
   }
 }
@@ -580,7 +585,7 @@ export const createAcl = (userDefinedOptions: PluginOption): object => {
 * @param aclRulesCallback
 * @return void
 */
-export const defineAclRules = (aclRulesCallback: Function): void => {
+export const defineAclRules = <U = User>(aclRulesCallback: (setter: RuleSetter<U>) => void): void => {
   if (typeof aclRulesCallback === "function") {
     aclRulesCallback(setRule);
   }
@@ -590,7 +595,7 @@ export const defineAclRules = (aclRulesCallback: Function): void => {
 * Returns the acl helper instance. Equivalent to using `$can` inside templates.
 * @return object
 */
-export const useAcl = () => {
+export const useAcl = <U = User>(): Acl<U> => {
   let acl: any = {};
   acl.user = computed(() => state.registeredUser).value;
   acl.getUser = () => state.registeredUser;
