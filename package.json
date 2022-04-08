@@ -7,9 +7,11 @@
   "module": "dist/vue-simple-acl.esm.js",
   "unpkg": "dist/vue-simple-acl.min.js",
   "jsdelivr": "dist/vue-simple-acl.min.js",
+  "typings": "types/index.d.ts",
   "files": [
     "dist/*",
-    "src/*"
+    "src/*",
+    "types/*"
   ],
   "scripts": {
     "dev": "vite",
