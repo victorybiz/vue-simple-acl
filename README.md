@@ -152,6 +152,9 @@ import store from "../store";
 import { computed } from 'vue'; // For VUE 3
 import { createAcl, defineAclRules } from 'vue-simple-acl';
 
+// in Vue 3, if you received the error "ReferenceError: Vue is not defined", import from the src path
+import { createAcl, defineAclRules } from 'vue-simple-acl/src';
+
 // ----- VUE 2 Imports -----
 import Vue from 'vue';
 import VueCompositionAPI from '@vue/composition-api'; // Ensure this is installed
