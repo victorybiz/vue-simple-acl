@@ -67,7 +67,7 @@ A simple unopinionated Vue plugin for managing user roles and permissions, acces
 - Global `$can` helper function
 - Sematic alias methods and directives of different verb for directive and helper function. E.g `v-role`, `v-permission`, `$acl.permission()`, `$acl.anyRole()`, etc.
 - Middleware support for [Vue Router](https://next.router.vuejs.org/) through `meta` property.
-- Support user data from plain object, vuex store and asynchronous function.
+- Support user data from plain object, pinia/vuex store and asynchronous function.
 - Reactive changes of abilities and permissions
 - Define custom ACL rules
 - Fully Typecript: The source code is written entirely in TypeScript.
@@ -115,7 +115,7 @@ app.mount("#app");
 <a name="usage-vue2"></a>
 
 ### Usage with Vue 2
-In Vue 2, when using User data from reactive Store/Vuex wrapped with `computed()` function, which is available in Vue 3 as module by default but not in Vue 2, make sure to install [@vue/composition-api](https://github.com/vuejs/composition-api#npm) first and change the imported module to: `import { computed } from '@vue/composition-api'`
+In Vue 2, when using User data from reactive Store/Pinia/Vuex wrapped with `computed()` function, which is available in Vue 3 as module by default but not in Vue 2, make sure to install [@vue/composition-api](https://github.com/vuejs/composition-api#npm) first and change the imported module to: `import { computed } from '@vue/composition-api'`
 ```javascript
 // src/main.js  OR  src/main.ts
 
@@ -145,7 +145,7 @@ For readability, it is recommend to defined your ACL rules in a separate file.
 
 // Import router if you are using the middleware on Vue Router
 import router from "../router"; 
-// Import store if you are using reactive Store/Vuex as User data source
+// Import store if you are using reactive Store/Pinia/Vuex as User data source
 import store from "../store";
 
 // ----- VUE 3 Imports -----
@@ -173,8 +173,8 @@ const user = {
   permissions: ['admin', 'owner', 'moderator', 'create-post', 'edit-post', 'delete-post']
 }
 
-// USER EXAMPLE 2: User object from a {FUNCTION} or computed property like from Vuex Store
-// Suitable if you already has an existing logics authenticating and saving user data to Vuex Store
+// USER EXAMPLE 2: User object from a {FUNCTION} or computed property like from Pinia/Vuex Store
+// Suitable if you already has an existing logics authenticating and saving user data to Pinia/Vuex Store
 const user2 = computed(() => store.state.auth.user);
 
 // USER EXAMPLE 3; User object from an Asynchronous {FUNCTION} / {PROMISE}:
