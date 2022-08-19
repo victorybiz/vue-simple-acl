@@ -1,6 +1,6 @@
 import { computed, reactive } from 'vue';
 
-import { Ability, AbilityArgs, PluginOption, State, User } from '../types';
+import { Ability, AbilityArgs, AnyFunction, PluginOption, State, User } from '../types';
 import { PluginOptionWithDefaults, AbilitiesEvaluationProps, Acl, AsyncUser, RuleSetter } from '../types/acl';
 import { capitalize, getFunctionArgsNames } from './utils';
 
@@ -21,7 +21,8 @@ const registerPluginOptions = <U = User>(pluginOptions: PluginOptionWithDefaults
   if (hasAsyncUser(pluginOptions.user)) {
     state.registeredUser = pluginOptions.user();
   } else {
-    state.registeredUser = pluginOptions.user;
+    const user: any = pluginOptions.user;
+    state.registeredUser = user;
   }   
   // Run and init the defined rules
   if (pluginOptions.rules && typeof pluginOptions.rules === "function") {
@@ -38,8 +39,8 @@ const registerPluginOptions = <U = User>(pluginOptions: PluginOptionWithDefaults
  * @param callback 
  * @return void 
  */
-const addAclAbility = (ability: string, callback: Function): void => {
-  if (!state.registeredRules.hasOwnProperty(ability)) {
+const addAclAbility = (ability: string, callback: AnyFunction): void => {
+  if (!Object.prototype.hasOwnProperty.call(state.registeredRules, ability)) {
     state.registeredRules[ability] = callback;
   } else {
     console.warn(`:::VueSimpleACL::: Duplicate ACL Rule '${ability}' defined. Only the first defined rule will be evaluated.`)
@@ -52,7 +53,7 @@ const addAclAbility = (ability: string, callback: Function): void => {
  * @param callback 
  * @return void
  */
-const setRule = (abilities: Ability, callback: Function): void => {
+const setRule = (abilities: Ability, callback: AnyFunction): void => {
   if (typeof abilities === "string") {
     addAclAbility(abilities, callback);
   } else if (typeof abilities === "object" && Array.isArray(abilities)) {     
@@ -69,7 +70,7 @@ const setRule = (abilities: Ability, callback: Function): void => {
  * @param args arguments
  * @return boolean
  */
-const evaluateAbilityCallback = (abilityCallback: Function, ability: Ability, args?: AbilityArgs): boolean => {
+const evaluateAbilityCallback = (abilityCallback: any, ability: Ability, args?: AbilityArgs): boolean => {
   try {
     if (typeof abilityCallback === 'function') {
       if (typeof args === 'object' && !Array.isArray(args)) {
@@ -84,7 +85,7 @@ const evaluateAbilityCallback = (abilityCallback: Function, ability: Ability, ar
   } catch (error) {
     // Prepare an error message
     // Get the $can args to be passed from the callback function string
-    let callbackArgsNames = getFunctionArgsNames(abilityCallback);
+    const callbackArgsNames = getFunctionArgsNames(abilityCallback);
     let StrCallbackArgsNames = null;
 
     if (callbackArgsNames && Array.isArray(callbackArgsNames)) {
@@ -120,8 +121,8 @@ const evaluateAbilityCallback = (abilityCallback: Function, ability: Ability, ar
  */
 const checkAclAbilities = ({ abilities, args, any = false }: AbilitiesEvaluationProps): boolean => {
   if (abilities && typeof abilities === 'string') {
-    if (state.registeredRules.hasOwnProperty(abilities)) {
-      let callback = state.registeredRules[abilities];
+    if (Object.prototype.hasOwnProperty.call(state.registeredRules, abilities)) {
+      const callback = state.registeredRules[abilities];
       return evaluateAbilityCallback(callback, abilities, args);
     }
   } else if (typeof abilities === 'object' && Array.isArray(abilities)) {
@@ -130,8 +131,8 @@ const checkAclAbilities = ({ abilities, args, any = false }: AbilitiesEvaluation
     let counter = 0;
     let validCount = 0;
     abilities.forEach((ability) => {
-      if (state.registeredRules.hasOwnProperty(ability.abilities)) {
-        let callback = state.registeredRules[ability.abilities];
+      if (Object.prototype.hasOwnProperty.call(state.registeredRules, ability.abilities)) {
+        const callback = state.registeredRules[ability.abilities];
         callbackResponse =  evaluateAbilityCallback(callback, ability.abilities, ability.args);
         if (validCount) {
           validCount++;
@@ -176,13 +177,13 @@ const prepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps):
       aclStatus = checkAclAbilities({ abilities: aclArgs});
     } else if (aclArgs && aclArgs !== null && typeof aclArgs === 'object') {
       // v-can="['edit-post', post]" OR $can(['edit-post', post])
-      let argsCount = (Array.isArray(aclArgs)) ? aclArgs.length : Object.keys(aclArgs).length;        
+      const argsCount = (Array.isArray(aclArgs)) ? aclArgs.length : Object.keys(aclArgs).length;        
       if (argsCount === 2 && typeof aclArgs[0] === 'string' && typeof aclArgs[1] === 'object' && !Array.isArray(aclArgs[1])) {
         aclStatus = checkAclAbilities({ abilities: aclArgs[0], args: aclArgs[1] });          
       } else {
         // v-can="['create-post', ['edit-post', post]]" OR $can(['create-post', ['edit-post', post]])
-        let abilityList: any[] = [];
-        let argList: any[] = [];
+        const abilityList: any[] = [];
+        const argList: any[] = [];
         aclArgs.forEach((ability) => {
           if (ability && typeof ability === 'string') {
             // ...=['create-post', ...]
@@ -191,7 +192,7 @@ const prepareAcl = ({ abilities, args, any = false }: AbilitiesEvaluationProps):
           } else if (ability && typeof ability === 'object') {
             // ...=[['edit-post', post], ...]
             let abilityInValue: string | null = null;
-            let argsInvalue: any[] = [];
+            const argsInvalue: any[] = [];
             ability.forEach((nextedAbility: any) => {
               if (nextedAbility && !abilityInValue && typeof nextedAbility === 'string') {
                 abilityInValue = nextedAbility;
@@ -282,7 +283,7 @@ const hasAsyncUser = <U = User>(user: U | AsyncUser<U>): user is AsyncUser<U> =>
  */
 export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => {
 
-  const isVue3: boolean = !!app.config.globalProperties;
+  const isVue3 = !!app.config.globalProperties;
   const defaultPluginOptions: PluginOptionWithDefaults<U> = {
     user: Object.create(null),
     rules: null,
@@ -297,7 +298,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
   // Sanitize directive name should the developer specified a custom name
   if (pluginOptions.directiveName && typeof pluginOptions.directiveName === "string") {
     if (pluginOptions.directiveName.startsWith('v-')) {
-      pluginOptions.directiveName = pluginOptions.directiveName.substr(2, pluginOptions.directiveName.length);
+      pluginOptions.directiveName = pluginOptions.directiveName.substring(2, pluginOptions.directiveName.length);
     }      
   }
 
@@ -315,7 +316,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
   }
   
   // directive handler function
-  const directiveHandler = (el: any, binding: any, vnode: any) => {
+  const directiveHandler = (el: any, binding: any) => {
     const aclAbilities = binding.arg;
     const aclArgs = binding.value;
     const aclModifiers = binding.modifiers;        
@@ -327,7 +328,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
     const hideModifier = (aclModifiers.hide || aclModifiers.hidden) ? true : false;
     
     // call to prepare ACL and check abilities
-    let aclStatus = prepareAcl({ abilities: aclAbilities, args: aclArgs, any: anyModifier });
+    const aclStatus = prepareAcl({ abilities: aclAbilities, args: aclArgs, any: anyModifier });
     if (aclStatus) {
       // ACL check is validm apply valid effect
   
@@ -357,20 +358,20 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
   const registerDirective = (app: any, name: string, isVue3: boolean) => {
     if (isVue3) {
       app.directive(`${name}`, {
-        mounted(el: any, binding: any, vnode: any) {
-          directiveHandler(el, binding, vnode);
+        mounted(el: any, binding: any) {
+          directiveHandler(el, binding);
         },
-        updated(el: any, binding: any, vnode: any) {
-          directiveHandler(el, binding, vnode);
+        updated(el: any, binding: any) {
+          directiveHandler(el, binding);
         }
       });
     } else {
       app.directive(`${name}`, {
-        mounted(el: any, binding: any, vnode: any) {
-          directiveHandler(el, binding, vnode);
+        mounted(el: any, binding: any) {
+          directiveHandler(el, binding);
         },
-        updated(el: any, binding: any, vnode: any) {
-          directiveHandler(el, binding, vnode);
+        updated(el: any, binding: any) {
+          directiveHandler(el, binding);
         }
       });
     }
@@ -449,7 +450,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
         app.prototype.$acl = {};
       }
       app.prototype.$acl.user = computed(() => state.registeredUser).value;
-      app.prototype.$acl.getUser = () => state.registeredUser;;
+      app.prototype.$acl.getUser = () => state.registeredUser;
     }    
   }
   
@@ -551,7 +552,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
           pluginOptions.user = user;
           registerPluginOptions(pluginOptions);
           evaluateRouterAcl(to, from, next);
-        }).catch((err: any) => {
+        }).catch(() => {
           // Abort router
           console.warn(`:::VueSimpleACL::: Error while processing/retrieving 'user' data with the Asynchronous function.`)
         });  
@@ -596,7 +597,7 @@ export const defineAclRules = <U = User>(aclRulesCallback: (setter: RuleSetter<U
 * @return object
 */
 export const useAcl = <U = User>(): Acl<U> => {
-  let acl: any = {};
+  const acl: any = {};
   acl.user = computed(() => state.registeredUser).value;
   acl.getUser = () => state.registeredUser;
   // 

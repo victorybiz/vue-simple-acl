@@ -10,12 +10,14 @@ const VueSimpleAcl = {
 }
 
 // Automatic installation if Vue has been added to the global scope.
-if (typeof window !== 'undefined' && window.Vue) {
-  window.Vue.use(VueSimpleAcl);
-}
+// if (typeof window !== 'undefined' && window.Vue) {
+//   window.Vue.use(VueSimpleAcl);
+// }
 
 export {
   createAcl,
   defineAclRules,
   useAcl,
 };
+
+export default VueSimpleAcl;

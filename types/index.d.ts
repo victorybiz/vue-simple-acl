@@ -6,6 +6,7 @@ export {
   State,
   Ability,
   AbilityArgs,
+  AnyFunction,
   createAcl,
   defineAclRules,
   useAcl,

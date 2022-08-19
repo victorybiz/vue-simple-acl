@@ -41,6 +41,7 @@ export type AbilitiesEvaluationProps = { abilities?: Ability, args?: AbilityArgs
 export type AbilitiesEvaluation = (abilities: Ability, args?: AbilityArgs) => boolean;
 export type PolicyEvaluation<U = User> = (user: U, ...params: any[]) => boolean;
 export type RuleSetter<U = User> = (abilities: Ability, callback: PolicyEvaluation<U>) => void;
+export type AnyFunction = (...args: any[]) => any;
 
 export interface Acl<User> {
   user: ComputedRef<User>;

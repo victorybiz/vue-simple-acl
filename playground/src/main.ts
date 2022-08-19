@@ -2,7 +2,8 @@
 import { createApp, computed } from 'vue';
 import App from './App.vue';
 import { createAcl, defineAclRules } from '../../src';
-import axios from 'axios';;
+// import { createAcl, defineAclRules } from '../../dist/vue-simple-acl.mjs';
+import axios from 'axios';
 
 // Router setup
 import { createRouter, createWebHistory } from 'vue-router';

@@ -152,15 +152,12 @@ import store from "../store";
 import { computed } from 'vue'; // For VUE 3
 import { createAcl, defineAclRules } from 'vue-simple-acl';
 
-// in Vue 3, if you received the error "ReferenceError: Vue is not defined", import from the src path
-import { createAcl, defineAclRules } from 'vue-simple-acl/src';
-
 // ----- VUE 2 Imports -----
 import Vue from 'vue';
 import VueCompositionAPI from '@vue/composition-api'; // Ensure this is installed
 Vue.use(VueCompositionAPI); // VueCompositionAPI must be used as plugin before any function, otherwise see your console if warning/errpr
 import { computed } from '@vue/composition-api'; // import computed function
-import { createAcl, defineAclRules } from 'vue-simple-acl/dist/vue-simple-acl.vue2';
+import { createAcl, defineAclRules } from 'vue-simple-acl';
 
 // ---------------
 // The Vue Simple ACL option 'user' can be a user OBJECT, FUNCTION returning a user object
