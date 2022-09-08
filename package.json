@@ -1,6 +1,6 @@
 {
   "name": "vue-simple-acl",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "description": "A simple unopinionated Vue plugin for managing user roles and permissions, access-control list (ACL) and role-based access control (RBAC).",
   "main": "dist/vue-simple-acl.js",
   "module": "dist/vue-simple-acl.mjs",
