@@ -134,7 +134,7 @@ const checkAclAbilities = ({ abilities, args, any = false }: AbilitiesEvaluation
       if (Object.prototype.hasOwnProperty.call(state.registeredRules, ability.abilities)) {
         const callback = state.registeredRules[ability.abilities];
         callbackResponse =  evaluateAbilityCallback(callback, ability.abilities, ability.args);
-        if (validCount) {
+        if (callbackResponse) {
           validCount++;
         }
         if (any === true && callbackResponse) {
