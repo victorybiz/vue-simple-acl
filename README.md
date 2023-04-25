@@ -101,7 +101,7 @@ yarn add vue-simple-acl
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './store';
+import router from './router';
 import store from './store';
 import acl from './acl'; // import the instance of the defined ACL
 
@@ -147,6 +147,8 @@ For readability, it is recommend to defined your ACL rules in a separate file.
 import router from "../router"; 
 // Import store if you are using reactive Store/Pinia/Vuex as User data source
 import store from "../store";
+//Example for Pinia
+//import {useAuthStore} from "@/stores/auth-user";
 
 // ----- VUE 3 Imports -----
 import { computed } from 'vue'; // For VUE 3
@@ -188,7 +190,11 @@ const user3 = () => {
 const rules = () => defineAclRules((setRule) => {
   // setRule('unique-ability', callbackFunction(user, arg1, arg2, ...) { });
   // setRule(['unique-ability-1', 'unique-ability-2'], callbackFunction(user, arg1, arg2, ...) { });
-  
+  /**
+  For Pinia
+  const authUser = useAuthStore();
+  const user = authUser.getUser // Suppose it has a getUser getter
+   */
   // Define a simple rule for ability with no argument
   setRule('create-post', (user) => user.is_admin || user.is_editor);
   setRule('is-admin', (user) => user.is_admin);
