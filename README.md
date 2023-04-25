@@ -101,7 +101,7 @@ yarn add vue-simple-acl
 
 import { createApp } from 'vue'
 import App from './App.vue'
-import router from './store';
+import router from './router';
 import store from './store';
 import acl from './acl'; // import the instance of the defined ACL
 
