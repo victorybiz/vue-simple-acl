@@ -334,7 +334,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
   
       // reverse the valid effect
       if (notModifier) {
-        el.style.display = 'none'; 
+        el.remove()
       }
     } else {
         // v-can:edit-post.disabled="post"
@@ -347,9 +347,9 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
         } else if (readonlyModifier) {
           el.readOnly = true;
         } else if (hideModifier) {
-          el.style.display = 'none';
+          el.remove()
         } else {
-          el.style.display = 'none';
+          el.remove()
         }
       }            
     }
@@ -367,7 +367,7 @@ export const installPlugin = <U = User>(app: any, options?: PluginOption<U>) => 
       });
     } else {
       app.directive(`${name}`, {
-        mounted(el: any, binding: any) {
+        inserted(el: any, binding: any) {
           directiveHandler(el, binding);
         },
         updated(el: any, binding: any) {
