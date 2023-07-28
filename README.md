@@ -178,7 +178,7 @@ const user = {
 const user2 = computed(() => store.state.auth.user);
 
 // USER EXAMPLE 3; User object from an Asynchronous {FUNCTION} / {PROMISE}:
-// Using Async/Promise requires instance of vue-router, the function will be auto hooked to beforeEach() peroperty of vue-router
+// Using Async/Promise requires instance of vue-router, the function will be auto hooked to beforeEach() property of vue-router
 const user3 = () => {
   const authUserId = 1; // ID of authenticated user
   return axios.get(`api/users/${authUserId}`)
